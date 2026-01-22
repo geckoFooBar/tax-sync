@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="welcome_to_android_app">Welcome to Android App</string>
+    <string name="click_me">Click Me</string>
+</resources>
