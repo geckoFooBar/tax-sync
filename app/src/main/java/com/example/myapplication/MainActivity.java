@@ -2,7 +2,6 @@ package com.example.myapplication;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -17,14 +16,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         txtMessage = findViewById(R.id.txtMessage);
         // btnClick = findViewById(R.id.btnClick);
-
         // btnClick.setOnClickListener(view -> txtMessage.setText("Hello to TYBBA CA students!!!"));
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
