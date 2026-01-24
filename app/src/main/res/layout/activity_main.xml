@@ -13,9 +13,9 @@
         android:layout_marginBottom="56dp"/>
 
     <TextView
+        android:id="@+id/txtMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/txtMessage"
         android:text="@string/welcome_to_android_app"
         android:textSize="24sp"
         android:textColor="@color/white"
