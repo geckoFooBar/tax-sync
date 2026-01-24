@@ -3,4 +3,7 @@
 
     <string name="welcome_to_android_app">Welcome to Android App</string>
     <string name="click_me">Click Me</string>
+    <string name="home">Home</string>
+    <string name="services">Services</string>
+    <string name="profile">Profile</string>
 </resources>
