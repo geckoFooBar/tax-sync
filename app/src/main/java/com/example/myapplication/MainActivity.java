@@ -26,18 +26,22 @@ public class MainActivity extends AppCompatActivity {
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
-                if (itemId == R.id.nav_home) {
-                    txtMessage.setText("Home");
-                    return true;
-                } else if (itemId == R.id.nav_services) {
-                    txtMessage.setText("Services");
-                    return true;
-                } else if (itemId == R.id.nav_profile) {
-                    txtMessage.setText("Profile");
-                    return true;
-                } else {
-                    return false;
-                }
+            if (itemId == R.id.nav_home) {
+                txtMessage.setText("Home");
+                return true;
+            } else if(itemId == R.id.nav_fav) {
+                txtMessage.setText("Favorite");
+                return true;
+            } else if (itemId == R.id.nav_services) {
+                txtMessage.setText("Services");
+                return true;
+            } else if (itemId == R.id.nav_profile) {
+                txtMessage.setText("Profile");
+                return true;
+            } else {
+                return false;
+            }
+
         });
     }
 
