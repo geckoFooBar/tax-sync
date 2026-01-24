@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
             } else if(itemId == R.id.nav_fav) {
                 txtMessage.setText("Favorite");
                 return true;
-            } else if (itemId == R.id.nav_services) {
+            } else if (itemId == R.id.nav_search) {
                 txtMessage.setText("Services");
                 return true;
             } else if (itemId == R.id.nav_profile) {
