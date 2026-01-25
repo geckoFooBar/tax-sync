@@ -7,11 +7,13 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.maps.MapView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
     TextView txtMessage;
     Button btnClick;
+    MapView mapView;
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -19,10 +21,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-
+        //mapView = findViewById(R.id.mapView);
         txtMessage = findViewById(R.id.txtMessage);
         // btnClick = findViewById(R.id.btnClick);
         // btnClick.setOnClickListener(view -> txtMessage.setText("Hello to TYBBA CA students!!!"));
+
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
