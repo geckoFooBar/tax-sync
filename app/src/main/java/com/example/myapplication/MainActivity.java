@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
                 txtMessage.setText("Favorite");
                 return true;
             } else if (itemId == R.id.nav_search) {
-                txtMessage.setText("Services");
+                txtMessage.setText("Search");
                 return true;
             } else if (itemId == R.id.nav_profile) {
                 txtMessage.setText("Profile");

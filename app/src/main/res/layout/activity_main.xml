@@ -10,6 +10,7 @@
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/teal_700"
         android:layout_marginBottom="56dp"/>
 
     <TextView
@@ -19,7 +20,7 @@
         android:text="@string/welcome_to_android_app"
         android:textSize="24sp"
         android:textColor="@color/white"
-        android:layout_gravity="top|center"
+        android:layout_gravity="center|top"
         android:layout_marginTop="40dp"
         android:padding="10dp"
         android:paddingStart="10dp"
