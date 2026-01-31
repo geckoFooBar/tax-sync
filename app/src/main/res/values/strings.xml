@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Demo App</string>
+    <string name="app_name">TaxSync</string>
 
     <string name="welcome_to_android_app">Welcome to Android App</string>
     <string name="click_me">Click Me</string>
@@ -8,4 +8,13 @@
     <string name="search">Search</string>
     <string name="profile">Profile</string>
     <string name="favorite">Favorite</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
 </resources>
