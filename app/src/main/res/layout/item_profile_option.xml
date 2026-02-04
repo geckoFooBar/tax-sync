@@ -1,0 +1,14 @@
+<androidx.cardview.widget.CardView xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_marginBottom="12dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="3dp">
+
+    <TextView
+        android:text="Manage Linked Documents"
+        android:padding="16dp"
+        android:textColor="@color/text_primary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+</androidx.cardview.widget.CardView>

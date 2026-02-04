@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@color/bg_light"
+    android:padding="12dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Calendar -->
+    <CalendarView
+        android:id="@+id/calendarView"
+        android:paddingTop="24dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/calendar_header_bg"
+        android:focusedMonthDateColor="@color/calendar_header_text"
+        android:unfocusedMonthDateColor="@color/calendar_header_text"
+        android:selectedWeekBackgroundColor="@color/calendar_header_bg"
+        android:weekSeparatorLineColor="@color/calendar_header_text"
+        android:dateTextAppearance="@style/CalendarDateText"
+        android:weekDayTextAppearance="@style/CalendarWeekText"/>
+
+
+    <!-- Selected Date Text -->
+    <TextView
+        android:id="@+id/tvSelectedDate"
+        android:text="Taxes on selected date"
+        android:textStyle="bold"
+        android:textColor="@color/text_primary"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/tvMonthSummary"
+        android:text="This month: 0 payments"
+        android:textColor="@color/primary"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+
+    <!-- Tax List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvTaxCalendar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</LinearLayout>

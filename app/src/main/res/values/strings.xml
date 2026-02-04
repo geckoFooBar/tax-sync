@@ -17,6 +17,18 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="taxes">Taxes</string>
+    <string name="calendar">Calendar</string>
+    <string name="documents">Documents</string>
+    <string name="quick_actions">Quick Actions</string>
+    <string name="here_s_your_tax_overview">Here’s your tax overview</string>
+    <string name="total_taxes_due">Total Taxes Due</string>
+    <string name="_42_500">₹ 42,500</string>
+    <string name="upcoming_taxes">Upcoming Taxes</string>
+    <string name="welcome_em1">Welcome 👋, Rohan!!</string>
+    <string name="tax_calendar">Tax Calendar</string>
+    <string name="upcoming_deadlines">Upcoming deadlines</string>
+    <string name="your_tax_related_documents">Your tax-related documents</string>
+    <string name="pan_card">PAN Card</string>
+    <string name="verified_document">Verified document</string>
 </resources>

@@ -2,59 +2,56 @@ package com.example.myapplication;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.TextView;
-
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.NavigationUI;
-
-import com.google.android.gms.maps.MapView;
+import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
-    TextView txtMessage;
-    Button btnClick;
-    MapView mapView;
-    @SuppressLint("SetTextI18n")
+
+    @SuppressLint("NonConstantResourceId")
     @Override
-    protected void onCreate(Bundle savedInstanceState){
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        txtMessage = findViewById(R.id.txtMessage);
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
 
-        // Replace the old NavController line with this:
-        // Replace the crashy lines (31-34) with this:
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.fragment_container);
+        // Default screen
+        loadFragment(new DashboardFragment());
 
-        if (navHostFragment != null) {
-            NavController navController = navHostFragment.getNavController();
-            NavigationUI.setupWithNavController(bottomNavigationView, navController);
+        bottomNav.setOnItemSelectedListener(item -> {
+            Fragment fragment = null;
 
-            bottomNavigationView.setOnItemSelectedListener(item -> {
-                boolean handled = NavigationUI.onNavDestinationSelected(item, navController);
-                if (handled) {
-                    int itemId = item.getItemId();
-                    if (itemId == R.id.nav_home) {
-                        txtMessage.setText("Home");
-                    } else if (itemId == R.id.nav_fav) {
-                        txtMessage.setText("Favorite");
-                    } else if (itemId == R.id.nav_search) {
-                        txtMessage.setText("Search");
-                    } else if (itemId == R.id.nav_profile) {
-                        txtMessage.setText("Profile");
-                    }
-                }
-                return handled;
-            });
-        } else {
-            // This logs a message to your console so you know the ID is still wrong
-            android.util.Log.e("MainActivity", "Error: fragment_container not found in XML");
-        }
+            switch (item.getItemId()) {
+                case R.id.nav_home:
+                    fragment = new DashboardFragment();
+                    break;
+                case R.id.nav_taxes:
+                    fragment = new TaxesFragment();
+                    break;
+                case R.id.nav_calendar:
+                    fragment = new TaxCalendarFragment();
+                    break;
+                case R.id.nav_documents:
+                    fragment = new DocumentsFragment();
+                    break;
+                case R.id.nav_profile:
+                    fragment = new ProfileFragment();
+                    break;
+            }
+
+            return loadFragment(fragment);
+        });
     }
 
+    private boolean loadFragment(Fragment fragment) {
+        if (fragment != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.main_container, fragment)
+                    .commit();
+            return true;
+        }
+        return false;
+    }
 }
