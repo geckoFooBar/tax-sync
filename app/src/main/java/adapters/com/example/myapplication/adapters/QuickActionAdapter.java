@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.myapplication.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +11,7 @@ public class QuickActionAdapter extends RecyclerView.Adapter<QuickActionAdapter.
 
     String[] actions = {
             "Pay Tax",
-            "Tax Calendar",
+            "Calendar",
             "File Return",
             "Tax History",
             "Calculator",

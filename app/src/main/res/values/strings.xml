@@ -31,4 +31,6 @@
     <string name="your_tax_related_documents">Your tax-related documents</string>
     <string name="pan_card">PAN Card</string>
     <string name="verified_document">Verified document</string>
+    <string name="taxes_on_selected_date">Taxes on selected date</string>
+    <string name="this_month_0_payments">This month: 0 payments</string>
 </resources>

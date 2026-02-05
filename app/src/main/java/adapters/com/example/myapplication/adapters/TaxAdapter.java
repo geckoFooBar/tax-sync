@@ -1,5 +1,6 @@
-package com.example.myapplication;
+package com.example.myapplication.adapters;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.myapplication.R;
+import com.example.myapplication.models.TaxItem;
 
 import java.util.List;
 
@@ -27,6 +31,7 @@ public class TaxAdapter extends RecyclerView.Adapter<TaxAdapter.TaxViewHolder> {
         return new TaxViewHolder(view);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull TaxViewHolder holder, int position) {
         TaxItem item = taxList.get(position);

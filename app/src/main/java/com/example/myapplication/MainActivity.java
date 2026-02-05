@@ -4,6 +4,12 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+
+import com.example.myapplication.fragments.DashboardFragment;
+import com.example.myapplication.fragments.DocumentsFragment;
+import com.example.myapplication.fragments.ProfileFragment;
+import com.example.myapplication.fragments.TaxCalendarFragment;
+import com.example.myapplication.fragments.TaxesFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {

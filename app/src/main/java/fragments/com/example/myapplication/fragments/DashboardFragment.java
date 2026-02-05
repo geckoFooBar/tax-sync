@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.myapplication.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,6 +8,12 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.myapplication.adapters.QuickActionAdapter;
+import com.example.myapplication.R;
+import com.example.myapplication.models.TaxItem;
+import com.example.myapplication.adapters.UpcomingTaxAdapter;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +38,7 @@ public class DashboardFragment extends Fragment {
         taxes.add(new TaxItem("Income Tax", "31 Mar 2026", "₹12,000"));
         taxes.add(new TaxItem("Property Tax", "10 Apr 2026", "₹5,500"));
         taxes.add(new TaxItem("Vehicle Tax", "20 May 2026", "₹2,000"));
+        taxes.add(new TaxItem("GST Payment", "31 Mar 2026", "₹3,000"));
 
         upcomingTaxes.setAdapter(new UpcomingTaxAdapter(taxes));
 

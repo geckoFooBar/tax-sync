@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.myapplication.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,6 +7,10 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.myapplication.R;
+import com.example.myapplication.models.TaxItem;
+
 import java.util.List;
 
 public class UpcomingTaxAdapter extends RecyclerView.Adapter<UpcomingTaxAdapter.ViewHolder> {
@@ -39,9 +43,9 @@ public class UpcomingTaxAdapter extends RecyclerView.Adapter<UpcomingTaxAdapter.
     @Override
     public void onBindViewHolder(ViewHolder h, int pos) {
         TaxItem t = list.get(pos);
-        h.name.setText(t.taxName);
-        h.date.setText("Due: " + t.dueDate);
-        h.amount.setText(t.amount);
+        h.name.setText(t.getTaxName());
+        h.date.setText("Due: " + t.getDueDate());
+        h.amount.setText(t.getAmount());
     }
 
     @Override

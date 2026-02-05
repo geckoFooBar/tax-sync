@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.myapplication.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +8,10 @@ import android.content.Intent;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.myapplication.models.CalendarTaxItem;
+import com.example.myapplication.R;
+import com.example.myapplication.TaxDetailActivity;
 
 import java.util.List;
 

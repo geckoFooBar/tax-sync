@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.myapplication.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,8 +12,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import com.example.myapplication.models.CalendarTaxItem;
+import com.example.myapplication.R;
+import com.example.myapplication.adapters.TaxCalendarAdapter;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -62,8 +67,6 @@ public class TaxCalendarFragment extends Fragment {
                         "dd MM yyyy", Locale.getDefault())
                         .parse(dayOfMonth + " " + (month + 1) + " " + year);
 
-
-                // 🔁 Filter list (existing behavior)
                 filterTaxesByDate(selectedDate, tvSelectedDate);
 
                 if (currentVisibleMonth == null ||
