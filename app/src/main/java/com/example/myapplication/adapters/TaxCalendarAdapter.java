@@ -9,7 +9,7 @@ import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myapplication.models.CalendarTaxItem;
+import com.example.myapplication.model.CalendarTaxItem;
 import com.example.myapplication.R;
 import com.example.myapplication.TaxDetailActivity;
 

@@ -1,5 +1,6 @@
 package com.example.myapplication.adapters;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,14 +9,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myapplication.models.DocumentItem;
+import com.example.myapplication.model.DocumentItem;
 import com.example.myapplication.R;
 
 import java.util.List;
 
 public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.DocViewHolder> {
 
-    private List<DocumentItem> documentList;
+    private final List<DocumentItem> documentList;
 
     public DocumentsAdapter(List<DocumentItem> documentList) {
         this.documentList = documentList;
@@ -29,6 +30,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.DocV
         return new DocViewHolder(view);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull DocViewHolder holder, int position) {
         DocumentItem item = documentList.get(position);

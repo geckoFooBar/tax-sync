@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.adapters.QuickActionAdapter;
 import com.example.myapplication.R;
-import com.example.myapplication.models.TaxItem;
+import com.example.myapplication.model.TaxItem;
 import com.example.myapplication.adapters.UpcomingTaxAdapter;
 
 import java.util.ArrayList;
