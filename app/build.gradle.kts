@@ -34,6 +34,18 @@ android {
     buildFeatures {
         viewBinding = true
     }
+    sourceSets {
+        getByName("main") {
+            java {
+                srcDirs("src\\main\\java", "src\\main\\java\\ui",
+                    "src\\main\\java",
+                    "src\\main\\java\\model", "src\\main\\java", "src\\main\\java\\fragments",
+                    "src\\main\\java",
+                    "src\\main\\java\\adapters", "src\\main\\java", "src\\main\\java\\models"
+                )
+            }
+        }
+    }
 }
 
 dependencies {
@@ -44,6 +56,9 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)
+    implementation(libs.navigation.fragment)
+    implementation(libs.navigation.ui)
+    implementation(libs.activity)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

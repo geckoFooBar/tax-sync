@@ -2,50 +2,62 @@ package com.example.myapplication;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.TextView;
-
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
-import com.google.android.gms.maps.MapView;
+import com.example.myapplication.fragments.DashboardFragment;
+import com.example.myapplication.fragments.DocumentsFragment;
+import com.example.myapplication.fragments.ProfileFragment;
+import com.example.myapplication.fragments.TaxCalendarFragment;
+import com.example.myapplication.fragments.TaxesFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
-    TextView txtMessage;
-    Button btnClick;
-    MapView mapView;
-    @SuppressLint("SetTextI18n")
+
+    @SuppressLint("NonConstantResourceId")
     @Override
-    protected void onCreate(Bundle savedInstanceState){
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        //mapView = findViewById(R.id.mapView);
-        txtMessage = findViewById(R.id.txtMessage);
-        // btnClick = findViewById(R.id.btnClick);
-        // btnClick.setOnClickListener(view -> txtMessage.setText("Hello to TYBBA CA students!!!"));
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
 
+        // Default screen
+        loadFragment(new DashboardFragment());
 
-        bottomNavigationView.setOnItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-            if (itemId == R.id.nav_home) {
-                txtMessage.setText("Home");
-                return true;
-            } else if(itemId == R.id.nav_fav) {
-                txtMessage.setText("Favorite");
-                return true;
-            } else if (itemId == R.id.nav_search) {
-                txtMessage.setText("Search");
-                return true;
-            } else if (itemId == R.id.nav_profile) {
-                txtMessage.setText("Profile");
-                return true;
-            } else {
-                return false;
+        bottomNav.setOnItemSelectedListener(item -> {
+            Fragment fragment = null;
+
+            switch (item.getItemId()) {
+                case R.id.nav_home:
+                    fragment = new DashboardFragment();
+                    break;
+                case R.id.nav_taxes:
+                    fragment = new TaxesFragment();
+                    break;
+                case R.id.nav_calendar:
+                    fragment = new TaxCalendarFragment();
+                    break;
+                case R.id.nav_documents:
+                    fragment = new DocumentsFragment();
+                    break;
+                case R.id.nav_profile:
+                    fragment = new ProfileFragment();
+                    break;
             }
 
+            return loadFragment(fragment);
         });
     }
 
+    private boolean loadFragment(Fragment fragment) {
+        if (fragment != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.main_container, fragment)
+                    .commit();
+            return true;
+        }
+        return false;
+    }
 }
