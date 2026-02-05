@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myapplication.models.DocumentItem;
+import com.example.myapplication.model.DocumentItem;
 import com.example.myapplication.adapters.DocumentsAdapter;
 import com.example.myapplication.R;
 

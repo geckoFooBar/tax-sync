@@ -12,13 +12,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 
-import com.example.myapplication.models.CalendarTaxItem;
+import com.example.myapplication.model.CalendarTaxItem;
 import com.example.myapplication.R;
 import com.example.myapplication.adapters.TaxCalendarAdapter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;

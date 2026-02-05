@@ -1,4 +1,4 @@
-package com.example.myapplication.models;
+package com.example.myapplication.model;
 
 public class TaxItem {
 

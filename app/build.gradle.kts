@@ -4,9 +4,7 @@ plugins {
 
 android {
     namespace = "com.example.myapplication"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.myapplication"
@@ -37,12 +35,7 @@ android {
     sourceSets {
         getByName("main") {
             java {
-                srcDirs("src\\main\\java", "src\\main\\java\\ui",
-                    "src\\main\\java",
-                    "src\\main\\java\\model", "src\\main\\java", "src\\main\\java\\fragments",
-                    "src\\main\\java",
-                    "src\\main\\java\\adapters", "src\\main\\java", "src\\main\\java\\models"
-                )
+                srcDirs("src/main/java")
             }
         }
     }
