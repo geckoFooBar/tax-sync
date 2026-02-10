@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.model.CalendarTaxItem;
 import com.example.myapplication.R;
-import com.example.myapplication.TaxDetailActivity;
+import com.example.myapplication.activity.TaxDetailActivity;
 
 import java.util.List;
 

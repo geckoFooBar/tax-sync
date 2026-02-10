@@ -47,7 +47,6 @@ public class TaxCalendarFragment extends Fragment {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // 🔹 Existing data (UNCHANGED)
         allTaxes = new ArrayList<>();
         allTaxes.add(new CalendarTaxItem("Income Tax", "10 Feb 2026", "Upcoming"));
         allTaxes.add(new CalendarTaxItem("Property Tax", "15 Mar 2026", "Overdue"));
@@ -57,7 +56,6 @@ public class TaxCalendarFragment extends Fragment {
         adapter = new TaxCalendarAdapter(new ArrayList<>());
         recyclerView.setAdapter(adapter);
 
-        // Show today's taxes initially
         filterTaxesByDate(new Date(), tvSelectedDate);
 
         calendarView.setOnDateChangeListener((view1, year, month, dayOfMonth) -> {
