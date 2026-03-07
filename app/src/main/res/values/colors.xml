@@ -31,5 +31,23 @@
 
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
+    <color name="primaryBlue">#1A73E8</color>
+    <color name="secondaryGreen">#00C853</color>
+    <color name="dangerRed">#E53935</color>
+    <color name="backgroundGrey">#F6F8FB</color>
+    <color name="cardWhite">#FFFFFF</color>
+    <color name="textDark">#1F2937</color>
+    <color name="textLight">#6B7280</color>
+
+    <color name="surface">#FFFFFF</color>
+    <color name="primary_dark">#3730A3</color>
+    <color name="primary_light_transparent">#1A4F46E5</color> <color name="success_green">#10B981</color>
+    <color name="success_light">#1A10B981</color>
+
+    <color name="warning_orange">#F59E0B</color>
+    <color name="warning_light">#1AF59E0B</color>
+
+    <color name="info_blue">#3B82F6</color>
+    <color name="info_light">#1A3B82F6</color>
 
 </resources>

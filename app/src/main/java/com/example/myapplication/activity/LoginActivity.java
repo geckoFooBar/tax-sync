@@ -1,52 +1,102 @@
 package com.example.myapplication.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.EditText;
+import android.util.Patterns;
+import android.widget.CheckBox;
 import android.widget.Toast;
+import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.example.myapplication.R;
+import com.example.myapplication.fragments.DashboardFragment;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 public class LoginActivity extends AppCompatActivity {
 
-    EditText etUsername, etPassword;
-    Button btn;
-
-    private static final String DUMMY_USERNAME = "admin";
-    private static final String DUMMY_PASSWORD = "admin123";
+    TextInputEditText emailEditText, passwordEditText;
+    TextInputLayout emailLayout, passwordLayout;
+    CheckBox rememberMe;
+    MaterialButton loginButton;
+    TextView signupText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
-        etUsername = findViewById(R.id.etUsername);
-        etPassword = findViewById(R.id.etPassword);
-        btn = findViewById(R.id.btnLogin);
+        emailEditText = findViewById(R.id.emailEditText);
+        passwordEditText = findViewById(R.id.passwordEditText);
+        emailLayout = findViewById(R.id.emailLayout);
+        passwordLayout = findViewById(R.id.passwordLayout);
+        rememberMe = findViewById(R.id.rememberMe);
+        loginButton = findViewById(R.id.loginButton);
+        signupText = findViewById(R.id.signupText);
 
-        btn.setOnClickListener(v -> {
+        SharedPreferences prefs = getSharedPreferences("auth", MODE_PRIVATE);
+        boolean isLoggedIn = prefs.getBoolean("isLoggedIn", false);
 
-            String username = etUsername.getText().toString();
-            String password = etPassword.getText().toString();
+        if (isLoggedIn) {
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+        }
 
-            if (username.equals(DUMMY_USERNAME) && password.equals(DUMMY_PASSWORD)) {
+        loginButton.setOnClickListener(v -> loginUser());
 
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
-            } else {
-                Toast.makeText(this,
-                "Invalid Username or Password",
-                        Toast.LENGTH_LONG).show();
-            }
+        signupText.setOnClickListener(v -> {
+            startActivity(new Intent(LoginActivity.this, SignupActivity.class));
         });
+    }
+
+    private void loginUser() {
+
+        String email = emailEditText.getText().toString().trim();
+        String password = passwordEditText.getText().toString().trim();
+
+        emailLayout.setError(null);
+        passwordLayout.setError(null);
+
+        if (email.isEmpty()) {
+            emailLayout.setError("Email is required");
+            return;
+        }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            emailLayout.setError("Enter a valid email");
+            return;
+        }
+
+        if (password.isEmpty()) {
+            passwordLayout.setError("Password is required");
+            return;
+        }
+
+        String dummyEmail = "test@taxapp.com";
+        String dummyPassword = "123456";
+
+        if (!email.equals(dummyEmail) || !password.equals(dummyPassword)) {
+
+            Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Save login state
+        SharedPreferences prefs = getSharedPreferences("auth", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        if (rememberMe.isChecked()) {
+            editor.putBoolean("isLoggedIn", true);
+        }
+
+        editor.apply();
+
+        Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
+
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 }

@@ -12,23 +12,38 @@
         android:gravity="center"
         android:padding="24dp">
 
-        <!-- App Logo -->
+        <!-- Logo -->
         <ImageView
-            android:layout_width="190dp"
+            android:layout_width="90dp"
             android:layout_height="90dp"
             android:src="@mipmap/ic_launcher"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Login Card -->
+        <!-- Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create Account"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start managing your taxes easily"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Card Container -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
             app:cardCornerRadius="20dp"
             app:cardElevation="10dp"
-            app:cardUseCompatPadding="true"
-            android:backgroundTint="@android:color/white">
-
+            app:cardUseCompatPadding="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -36,12 +51,26 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
+                <!-- Name -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/nameLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Full Name">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/nameEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
                 <!-- Email -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/emailLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Email">
+                    android:hint="Email"
+                    android:layout_marginTop="14dp">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/emailEditText"
@@ -57,7 +86,7 @@
                     android:layout_height="wrap_content"
                     android:hint="Password"
                     app:endIconMode="password_toggle"
-                    android:layout_marginTop="16dp">
+                    android:layout_marginTop="14dp">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/passwordEditText"
@@ -66,29 +95,37 @@
                         android:inputType="textPassword"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Remember Me -->
-                <CheckBox
-                    android:id="@+id/rememberMe"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Remember Me"
-                    android:layout_marginTop="10dp"/>
-
-                <!-- Login Button -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/loginButton"
+                <!-- Confirm Password -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/confirmPasswordLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Login"
+                    android:hint="Confirm Password"
+                    app:endIconMode="password_toggle"
+                    android:layout_marginTop="14dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/confirmPasswordEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Signup Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/signupButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Sign Up"
                     android:layout_marginTop="24dp"
                     app:cornerRadius="28dp"/>
 
-                <!-- Signup Link -->
+                <!-- Login Link -->
                 <TextView
-                    android:id="@+id/signupText"
+                    android:id="@+id/loginText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Don't have an account? Sign Up"
+                    android:text="Already have an account? Login"
                     android:textColor="#1976D2"
                     android:layout_marginTop="18dp"
                     android:layout_gravity="center"/>
@@ -96,5 +133,7 @@
             </LinearLayout>
 
         </androidx.cardview.widget.CardView>
+
     </LinearLayout>
+
 </ScrollView>
