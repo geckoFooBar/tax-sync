@@ -5,30 +5,46 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.widget.CheckBox;
-import android.widget.Toast;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myapplication.R;
-import com.example.myapplication.fragments.DashboardFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
 
-    TextInputEditText emailEditText, passwordEditText;
-    TextInputLayout emailLayout, passwordLayout;
-    CheckBox rememberMe;
-    MaterialButton loginButton;
-    TextView signupText;
+    private TextInputEditText emailEditText, passwordEditText;
+    private TextInputLayout emailLayout, passwordLayout;
+    private CheckBox rememberMe;
+    private MaterialButton loginButton;
+    private TextView signupText;
+
+    // Declare FirebaseAuth
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        // Initialize Firebase Auth
+        mAuth = FirebaseAuth.getInstance();
+
+        // Check if user is already logged in natively via Firebase
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+            return;
+        }
+
+        // Bind UI Elements
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         emailLayout = findViewById(R.id.emailLayout);
@@ -36,14 +52,6 @@ public class LoginActivity extends AppCompatActivity {
         rememberMe = findViewById(R.id.rememberMe);
         loginButton = findViewById(R.id.loginButton);
         signupText = findViewById(R.id.signupText);
-
-        SharedPreferences prefs = getSharedPreferences("auth", MODE_PRIVATE);
-        boolean isLoggedIn = prefs.getBoolean("isLoggedIn", false);
-
-        if (isLoggedIn) {
-            startActivity(new Intent(this, MainActivity.class));
-            finish();
-        }
 
         loginButton.setOnClickListener(v -> loginUser());
 
@@ -53,50 +61,62 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void loginUser() {
-
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
 
         emailLayout.setError(null);
         passwordLayout.setError(null);
 
-        if (email.isEmpty()) {
-            emailLayout.setError("Email is required");
-            return;
-        }
+        // Validation
+        if (email.isEmpty()) { emailLayout.setError("Email is required"); return; }
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) { emailLayout.setError("Enter a valid email"); return; }
+        if (password.isEmpty()) { passwordLayout.setError("Password is required"); return; }
 
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailLayout.setError("Enter a valid email");
-            return;
-        }
+        // Disable button while loading
+        loginButton.setEnabled(false);
+        loginButton.setText("Signing In...");
 
-        if (password.isEmpty()) {
-            passwordLayout.setError("Password is required");
-            return;
-        }
+        // Authenticate with Firebase
+        // Authenticate with Firebase
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
 
-        String dummyEmail = "test@taxapp.com";
-        String dummyPassword = "123456";
+                        FirebaseUser user = mAuth.getCurrentUser();
 
-        if (!email.equals(dummyEmail) || !password.equals(dummyPassword)) {
+                        SharedPreferences prefs = getSharedPreferences("auth", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = prefs.edit();
 
-            Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show();
-            return;
-        }
+                        if (rememberMe.isChecked()) {
+                            editor.putBoolean("isLoggedIn", true);
+                        }
 
-        // Save login state
-        SharedPreferences prefs = getSharedPreferences("auth", MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
+                        // NEW: Restore the Name and Email from Firebase to local memory!
+                        if (user != null) {
+                            String fetchedName = user.getDisplayName();
+                            String fetchedEmail = user.getEmail();
 
-        if (rememberMe.isChecked()) {
-            editor.putBoolean("isLoggedIn", true);
-        }
+                            // Fallback just in case they signed up before we added the name feature
+                            if (fetchedName == null || fetchedName.isEmpty()) {
+                                fetchedName = "Taxpayer";
+                            }
 
-        editor.apply();
+                            editor.putString("userName", fetchedName);
+                            editor.putString("userEmail", fetchedEmail);
+                        }
 
-        Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
+                        editor.apply();
 
-        startActivity(new Intent(this, MainActivity.class));
-        finish();
+                        Toast.makeText(LoginActivity.this, "Welcome Back!", Toast.LENGTH_SHORT).show();
+
+                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        loginButton.setEnabled(true);
+                        loginButton.setText("Sign In");
+                        Toast.makeText(LoginActivity.this, "Authentication failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
     }
 }

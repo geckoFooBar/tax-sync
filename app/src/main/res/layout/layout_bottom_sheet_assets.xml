@@ -25,11 +25,14 @@
         android:layout_marginBottom="16dp"/>
 
     <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:hint="Realized Capital Gains (Stocks/Gold)"
-        app:boxBackgroundMode="outline"
+        android:textColorHint="#6B7280"
+        app:hintTextColor="#3B82F6"
+        app:boxStrokeColor="#111827"
         app:boxCornerRadiusTopStart="12dp"
         app:boxCornerRadiusTopEnd="12dp"
         app:boxCornerRadiusBottomStart="12dp"
@@ -39,15 +42,19 @@
             android:id="@+id/editCapGains"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="#111827"
             android:inputType="numberDecimal" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
         android:hint="Crypto / VDA Profits"
-        app:boxBackgroundMode="outline"
+        android:textColorHint="#6B7280"
+        app:hintTextColor="#3B82F6"
+        app:boxStrokeColor="#111827"
         app:boxCornerRadiusTopStart="12dp"
         app:boxCornerRadiusTopEnd="12dp"
         app:boxCornerRadiusBottomStart="12dp"
@@ -57,15 +64,19 @@
             android:id="@+id/editCrypto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="#111827"
             android:inputType="numberDecimal" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:hint="Municipal Property Tax Paid"
-        app:boxBackgroundMode="outline"
+        android:layout_marginTop="12dp"
+        android:hint="Municipal Property Tax"
+        android:textColorHint="#6B7280"
+        app:hintTextColor="#3B82F6"
+        app:boxStrokeColor="#111827"
         app:boxCornerRadiusTopStart="12dp"
         app:boxCornerRadiusTopEnd="12dp"
         app:boxCornerRadiusBottomStart="12dp"
@@ -75,6 +86,7 @@
             android:id="@+id/editProperty"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="#111827"
             android:inputType="numberDecimal" />
     </com.google.android.material.textfield.TextInputLayout>
 

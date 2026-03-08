@@ -18,11 +18,11 @@
         android:padding="16dp">
 
         <LinearLayout
-            android:id="@+id/dateContainer"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:id="@+id/iconContainer"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="@drawable/circle_bg"
-            android:backgroundTint="#F9FAFB"
+            android:backgroundTint="#EFF6FF"
             android:gravity="center"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -30,26 +30,17 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
-                android:id="@+id/tvCalDay"
+                android:id="@+id/tvFileType"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#111827"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                tools:text="15" />
-
-            <TextView
-                android:id="@+id/tvCalMonth"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#6B7280"
+                android:textColor="#3B82F6"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                tools:text="JUN" />
+                tools:text="PDF" />
         </LinearLayout>
 
         <TextView
-            android:id="@+id/tvCalTaxTitle"
+            android:id="@+id/tvDocTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -57,39 +48,39 @@
             android:textColor="#111827"
             android:textSize="16sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@id/tvCalStatusBadge"
-            app:layout_constraintEnd_toStartOf="@id/tvCalAmount"
-            app:layout_constraintStart_toEndOf="@id/dateContainer"
-            app:layout_constraintTop_toTopOf="@id/dateContainer"
+            app:layout_constraintBottom_toTopOf="@id/tvDocStatus"
+            app:layout_constraintEnd_toStartOf="@id/tvDocAction"
+            app:layout_constraintStart_toEndOf="@id/iconContainer"
+            app:layout_constraintTop_toTopOf="@id/iconContainer"
             app:layout_constraintVertical_chainStyle="packed"
-            tools:text="Advance Tax (Q1)" />
+            tools:text="Permanent Account Number (PAN)" />
 
         <TextView
-            android:id="@+id/tvCalStatusBadge"
+            android:id="@+id/tvDocStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="6dp"
-            android:paddingHorizontal="8dp"
+            android:paddingHorizontal="6dp"
             android:paddingVertical="2dp"
             android:textSize="10sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@id/dateContainer"
-            app:layout_constraintStart_toEndOf="@id/dateContainer"
-            app:layout_constraintTop_toBottomOf="@id/tvCalTaxTitle"
-            tools:text="DUE SOON" />
+            app:layout_constraintBottom_toBottomOf="@id/iconContainer"
+            app:layout_constraintStart_toEndOf="@id/iconContainer"
+            app:layout_constraintTop_toBottomOf="@id/tvDocTitle"
+            tools:text="VERIFIED" />
 
         <TextView
-            android:id="@+id/tvCalAmount"
+            android:id="@+id/tvDocAction"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#111827"
-            android:textSize="16sp"
+            android:textColor="#3B82F6"
+            android:textSize="14sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="₹45,000" />
+            tools:text="View" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

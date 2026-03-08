@@ -1,18 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <!-- Primary Govt / DigiLocker style blue -->
     <color name="primary">#1A73E8</color>
 
-    <!-- Backgrounds -->
     <color name="bg_light">#F5F7FA</color>
     <color name="card_white">#FFFFFF</color>
 
-    <!-- Text -->
     <color name="text_primary">#202124</color>
     <color name="text_secondary">#5F6368</color>
 
-    <!-- Required Material defaults (DO NOT REMOVE) -->
     <color name="purple_200">#BB86FC</color>
     <color name="purple_500">#6200EE</color>
     <color name="purple_700">#3700B3</color>

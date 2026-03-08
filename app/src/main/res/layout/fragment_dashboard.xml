@@ -17,26 +17,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
-            android:layout_marginTop="32dp"
-            android:text="Dashboard"
+            android:layout_marginTop="44dp"
+            android:text=""
             android:textColor="#111827"
             android:textSize="22sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/ivProfile"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginTop="28dp"
-            android:layout_marginEnd="24dp"
-            android:background="@drawable/circle_bg"
-            android:backgroundTint="#F3F4F6"
-            android:padding="8dp"
-            android:src="@drawable/ic_profile"
-            app:tint="#4B5563"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -77,42 +63,41 @@
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="40dp"
             android:columnCount="2"
-            android:rowCount="2"
+            android:rowCount="4"
             app:layout_constraintTop_toBottomOf="@id/editIncome">
 
-            <FrameLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:layout_marginEnd="6dp"
-                android:layout_marginBottom="12dp">
+            <FrameLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_marginEnd="6dp" android:layout_marginBottom="12dp">
                 <include layout="@layout/card_income"/>
             </FrameLayout>
 
-            <FrameLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:layout_marginStart="6dp"
-                android:layout_marginBottom="12dp">
+            <FrameLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_marginStart="6dp" android:layout_marginBottom="12dp">
                 <include layout="@layout/card_tax_payable"/>
             </FrameLayout>
 
-            <FrameLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:layout_marginEnd="6dp">
+            <FrameLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_marginEnd="6dp" android:layout_marginBottom="12dp">
                 <include layout="@layout/card_tax_paid"/>
             </FrameLayout>
 
-            <FrameLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:layout_marginStart="6dp">
+            <FrameLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_marginStart="6dp" android:layout_marginBottom="12dp">
                 <include layout="@layout/card_savings"/>
             </FrameLayout>
+
+            <FrameLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_marginEnd="6dp" android:layout_marginBottom="12dp">
+                <include layout="@layout/card_capital_gains"/>
+            </FrameLayout>
+
+            <FrameLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_marginStart="6dp" android:layout_marginBottom="12dp">
+                <include layout="@layout/card_crypto_tax"/>
+            </FrameLayout>
+
+            <FrameLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_marginEnd="6dp">
+                <include layout="@layout/card_property_tax"/>
+            </FrameLayout>
+
+            <FrameLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_marginStart="6dp">
+                <include layout="@layout/card_cess"/>
+            </FrameLayout>
+
         </GridLayout>
 
         <LinearLayout
@@ -143,20 +128,17 @@
                 android:textColor="#3B82F6"
                 android:textSize="14sp"
                 app:rippleColor="#EFF6FF" />
-        </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvChartLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="40dp"
-            android:text="Income &amp; Tax Breakdown"
-            android:textColor="#111827"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/gridStats" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnClearData"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Clear"
+                android:textColor="#EF4444"
+                android:textSize="14sp"
+                app:rippleColor="#FEF2F2" />
+        </LinearLayout>
 
         <com.github.mikephil.charting.charts.PieChart
             android:id="@+id/taxChart"
@@ -164,7 +146,7 @@
             android:layout_height="300dp"
             android:layout_marginHorizontal="24dp"
             android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/tvChartLabel" />
+            app:layout_constraintTop_toBottomOf="@id/headerChart" />
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardInsight"

@@ -3,16 +3,16 @@ package com.example.myapplication.activity;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
 import com.example.myapplication.R;
 import com.example.myapplication.fragments.DashboardFragment;
 import com.example.myapplication.fragments.DocumentsFragment;
 import com.example.myapplication.fragments.ProfileFragment;
-import com.example.myapplication.fragments.TaxCalendarFragment;
+import com.example.myapplication.fragments.CalendarFragment;
 import com.example.myapplication.fragments.TaxesFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.FirebaseApp;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
                     fragment = new TaxesFragment();
                     break;
                 case R.id.nav_calendar:
-                    fragment = new TaxCalendarFragment();
+                    fragment = new CalendarFragment();
                     break;
                 case R.id.nav_documents:
                     fragment = new DocumentsFragment();
@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
             return loadFragment(fragment);
         });
+        FirebaseApp.initializeApp(this);
     }
 
     private boolean loadFragment(Fragment fragment) {

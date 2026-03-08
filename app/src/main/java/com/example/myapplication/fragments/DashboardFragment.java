@@ -1,5 +1,7 @@
 package com.example.myapplication.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
@@ -32,25 +34,22 @@ public class DashboardFragment extends Fragment {
     // UI Elements
     private EditText editIncome;
     private TextView tvIncomeAmount, tvTaxPayableAmount, tvTaxPaidAmount, tvSavingsAmount, tvTaxInsight;
+
+    private TextView tvGreeting;
     private TextView tvCapGainsAmount, tvCryptoTaxAmount, tvPropertyTaxAmount, tvCessAmount;
     private PieChart taxChart;
-    private MaterialButton btnAddAssets;
+    private MaterialButton btnAddAssets, btnClearData;
 
-    // State Variables to store the user's explicit asset inputs from the bottom sheet
     private double userCapGainsProfit = 0;
     private double userCryptoProfit = 0;
     private double userPropertyTax = 0;
 
+    // SharedPreferences name
+    private static final String PREF_NAME = "TaxAppPrefs";
+
     // Helper Class for Tax Breakdown
     private class TaxBreakdown {
-        double baseIncomeTax;
-        double surcharge;
-        double capitalGainsTax;
-        double cryptoTax;
-        double propertyTax;
-        double professionalTax;
-        double cess;
-        double totalDeductions;
+        double baseIncomeTax, surcharge, capitalGainsTax, cryptoTax, propertyTax, professionalTax, cess, totalDeductions;
 
         double getTotalLiability() {
             return baseIncomeTax + surcharge + capitalGainsTax + cryptoTax + propertyTax + professionalTax + cess;
@@ -84,12 +83,45 @@ public class DashboardFragment extends Fragment {
 
         taxChart = view.findViewById(R.id.taxChart);
         btnAddAssets = view.findViewById(R.id.btnAddAssets);
+        btnClearData = view.findViewById(R.id.btnClearData);
 
-        // 2. Initial Setups
+        tvGreeting = view.findViewById(R.id.tvGreeting);
+
+        SharedPreferences authPrefs = requireActivity().getSharedPreferences("auth", Context.MODE_PRIVATE);
+        String fullName = authPrefs.getString("userName", "User");
+
+        if (tvGreeting != null) {
+            try {
+                // Grab just the first word (First Name)
+                String firstName = fullName.trim().split("\\s+")[0];
+                tvGreeting.setText("Welcome 👋, " + firstName);
+            } catch (Exception e) {
+                tvGreeting.setText("Welcome 👋, User");
+            }
+        }
+
         setupPieChart();
 
-        // 3. Listeners
+        // 2. Load Saved Data from previous sessions/tabs
+        loadSavedData();
+
+        // 3. Button Listeners
         btnAddAssets.setOnClickListener(v -> showAssetBottomSheet());
+
+        btnClearData.setOnClickListener(v -> {
+            // Wipe variables
+            userCapGainsProfit = 0;
+            userCryptoProfit = 0;
+            userPropertyTax = 0;
+
+            // Clear the main text box
+            editIncome.setText("");
+            editIncome.clearFocus();
+
+            // Wipe from phone storage too
+            SharedPreferences prefs = requireActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+            prefs.edit().clear().apply();
+        });
 
         editIncome.addTextChangedListener(new TextWatcher() {
             @Override
@@ -101,47 +133,76 @@ public class DashboardFragment extends Fragment {
                 refreshDashboard();
             }
         });
+
+        loadSavedData();
     }
 
-    // Unified method to recalculate everything whenever ANY data changes
-    /*
+    // Loads the data the moment the fragment is created
+    private void loadSavedData() {
+        SharedPreferences prefs = requireActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+
+        userCapGainsProfit = prefs.getFloat("capGains", 0f);
+        userCryptoProfit = prefs.getFloat("cryptoProfit", 0f);
+        userPropertyTax = prefs.getFloat("propertyTax", 0f);
+
+        String savedIncome = prefs.getString("grossIncome", "");
+        if (!savedIncome.isEmpty()) {
+            editIncome.setText(savedIncome); // This automatically triggers refreshDashboard()
+        }
+        refreshDashboard();
+    }
+
+    // Unified bulletproof method to recalculate AND auto-save everything
     private void refreshDashboard() {
         String incomeStr = editIncome.getText().toString();
+        double grossIncome = 0;
+
+        // Safely try to read the number
         if (!incomeStr.trim().isEmpty()) {
             try {
-                double grossIncome = Double.parseDouble(incomeStr);
-                TaxBreakdown breakdown = calculateComprehensiveTax(grossIncome);
-
-                NumberFormat format = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
-                format.setMaximumFractionDigits(0);
-
-                double totalLiability = breakdown.getTotalLiability();
-                // Take home is Total Incomes (Salary + Cap Gains + Crypto) minus Total Taxes Owed
-                double takeHome = (grossIncome + userCapGainsProfit + userCryptoProfit) - totalLiability;
-
-                // Update the Top 4 Cards
-                tvIncomeAmount.setText(format.format(grossIncome));
-                tvTaxPayableAmount.setText(format.format(totalLiability));
-                tvTaxPaidAmount.setText(format.format(0)); // Static pending a new feature
-                tvSavingsAmount.setText(format.format(takeHome));
-
-                // Update the Bottom 4 Details Cards
-                tvCapGainsAmount.setText(format.format(breakdown.capitalGainsTax));
-                tvCryptoTaxAmount.setText(format.format(breakdown.cryptoTax));
-                tvPropertyTaxAmount.setText(format.format(breakdown.propertyTax));
-                tvCessAmount.setText(format.format(breakdown.cess + breakdown.professionalTax));
-
-                // Update Chart & Insights
-                updateInsight(grossIncome);
-                updateChartData(grossIncome, breakdown, takeHome);
-
+                grossIncome = Double.parseDouble(incomeStr);
             } catch (NumberFormatException e) {
-                // Safely ignore invalid characters
+                grossIncome = 0;
             }
-        } else {
-            refreshDashboard();
         }
-    }*/
+
+        // AUTO-SAVE to phone storage instantly
+        if (getActivity() != null) {
+            SharedPreferences.Editor editor = requireActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE).edit();
+            editor.putString("grossIncome", incomeStr);
+            editor.putFloat("capGains", (float) userCapGainsProfit);
+            editor.putFloat("cryptoProfit", (float) userCryptoProfit);
+            editor.putFloat("propertyTax", (float) userPropertyTax);
+            editor.apply();
+        }
+
+        // Calculate math
+        TaxBreakdown breakdown = calculateComprehensiveTax(grossIncome);
+
+        NumberFormat format = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
+        format.setMaximumFractionDigits(0);
+
+        double totalLiability = breakdown.getTotalLiability();
+        double takeHome = (grossIncome + userCapGainsProfit + userCryptoProfit) - totalLiability;
+
+        SharedPreferences prefs = requireActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        double totalCleared = prefs.getFloat("totalTaxesPaid", 0f);
+        // Safely update the Top 4 Cards
+        if (tvIncomeAmount != null) tvIncomeAmount.setText(format.format(grossIncome));
+        if (tvTaxPayableAmount != null) tvTaxPayableAmount.setText(format.format(totalLiability));
+        if (tvTaxPaidAmount != null) tvTaxPaidAmount.setText(format.format(totalCleared));
+        if (tvSavingsAmount != null) tvSavingsAmount.setText(format.format(takeHome));
+
+        // Safely update the Bottom 4 Details Cards
+        if (tvCapGainsAmount != null) tvCapGainsAmount.setText(format.format(breakdown.capitalGainsTax));
+        if (tvCryptoTaxAmount != null) tvCryptoTaxAmount.setText(format.format(breakdown.cryptoTax));
+        if (tvPropertyTaxAmount != null) tvPropertyTaxAmount.setText(format.format(breakdown.propertyTax));
+        if (tvCessAmount != null) tvCessAmount.setText(format.format(breakdown.cess + breakdown.professionalTax));
+
+        // Safely update Chart & Insights
+        if (tvTaxInsight != null) updateInsight(grossIncome);
+        if (taxChart != null) updateChartData(grossIncome, breakdown, takeHome);
+    }
 
     private void showAssetBottomSheet() {
         BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
@@ -153,10 +214,9 @@ public class DashboardFragment extends Fragment {
         EditText editProperty = sheetView.findViewById(R.id.editProperty);
         MaterialButton btnSave = sheetView.findViewById(R.id.btnSaveAssets);
 
-        // Pre-fill existing values if they entered them before
-        if (userCapGainsProfit > 0) editCapGains.setText(String.valueOf((int)userCapGainsProfit));
-        if (userCryptoProfit > 0) editCrypto.setText(String.valueOf((int)userCryptoProfit));
-        if (userPropertyTax > 0) editProperty.setText(String.valueOf((int)userPropertyTax));
+        editCapGains.setText(formatForInput(userCapGainsProfit));
+        editCrypto.setText(formatForInput(userCryptoProfit));
+        editProperty.setText(formatForInput(userPropertyTax));
 
         btnSave.setOnClickListener(v -> {
             userCapGainsProfit = parseInput(editCapGains.getText().toString());
@@ -164,10 +224,18 @@ public class DashboardFragment extends Fragment {
             userPropertyTax = parseInput(editProperty.getText().toString());
 
             dialog.dismiss();
-            refreshDashboard(); // Recalculate everything with new bottom-sheet inputs!
+            refreshDashboard(); // This will recalculate AND auto-save to storage
         });
 
         dialog.show();
+    }
+
+    private String formatForInput(double value) {
+        if (value == 0) return "";
+        if (value == (long) value) {
+            return String.format(Locale.US, "%d", (long) value);
+        }
+        return String.valueOf(value);
     }
 
     private double parseInput(String input) {
@@ -179,29 +247,46 @@ public class DashboardFragment extends Fragment {
     private TaxBreakdown calculateComprehensiveTax(double income) {
         TaxBreakdown tb = new TaxBreakdown();
 
-        // 1. Deductions & Taxable Base
-        tb.totalDeductions = Math.min(income * 0.15, 250000); // Standard/80C dummy logic
+        // 1. Standard Deduction (₹75,000)
+        tb.totalDeductions = Math.min(income, 75000);
         double taxableIncome = Math.max(0, income - tb.totalDeductions);
 
-        // 2. Base Income Tax
-        if (taxableIncome <= 300000) tb.baseIncomeTax = 0;
-        else if (taxableIncome <= 600000) tb.baseIncomeTax = (taxableIncome - 300000) * 0.05;
-        else if (taxableIncome <= 900000) tb.baseIncomeTax = 15000 + (taxableIncome - 600000) * 0.10;
-        else if (taxableIncome <= 1200000) tb.baseIncomeTax = 45000 + (taxableIncome - 900000) * 0.15;
-        else if (taxableIncome <= 1500000) tb.baseIncomeTax = 90000 + (taxableIncome - 1200000) * 0.20;
-        else tb.baseIncomeTax = 150000 + (taxableIncome - 1500000) * 0.30;
+        // 2. Base Income Tax (Strictly applying the New Regime Slabs you provided)
+        if (taxableIncome <= 400000) {
+            tb.baseIncomeTax = 0;
+        } else if (taxableIncome <= 800000) {
+            tb.baseIncomeTax = (taxableIncome - 400000) * 0.05;
+        } else if (taxableIncome <= 1200000) {
+            tb.baseIncomeTax = 20000 + (taxableIncome - 800000) * 0.10;
+        } else if (taxableIncome <= 1600000) {
+            tb.baseIncomeTax = 60000 + (taxableIncome - 1200000) * 0.15;
+        } else if (taxableIncome <= 2000000) {
+            tb.baseIncomeTax = 120000 + (taxableIncome - 1600000) * 0.20;
+        } else if (taxableIncome <= 2400000) {
+            tb.baseIncomeTax = 200000 + (taxableIncome - 2000000) * 0.25;
+        } else {
+            tb.baseIncomeTax = 300000 + (taxableIncome - 2400000) * 0.30;
+        }
 
-        // 3. Surcharge & State Taxes
-        tb.surcharge = (income > 5000000) ? tb.baseIncomeTax * 0.10 : 0;
-        tb.professionalTax = (income > 300000) ? 2500 : 0;
+        // NOTE: Section 87A Rebate logic has been removed so the user sees the true slab calculation.
 
-        // 4. Custom User Inputs applied to Tax Brackets
-        tb.capitalGainsTax = userCapGainsProfit * 0.10; // 10% LTCG assumed
-        tb.cryptoTax = userCryptoProfit * 0.30;         // 30% Flat Tax
-        tb.propertyTax = userPropertyTax;               // Direct pass-through
+        // 3. Custom User Inputs
+        tb.capitalGainsTax = userCapGainsProfit * 0.125;
+        tb.cryptoTax = userCryptoProfit * 0.30;
+        tb.propertyTax = userPropertyTax;
 
-        // 5. Cess (4% on Income Tax + Surcharge + CapGains Tax)
-        tb.cess = (tb.baseIncomeTax + tb.surcharge + tb.capitalGainsTax) * 0.04;
+        // 4. Tiered Surcharge
+        double totalIncome = taxableIncome + userCapGainsProfit + userCryptoProfit;
+        if (totalIncome > 20000000) tb.surcharge = tb.baseIncomeTax * 0.25;
+        else if (totalIncome > 10000000) tb.surcharge = tb.baseIncomeTax * 0.15;
+        else if (totalIncome > 5000000) tb.surcharge = tb.baseIncomeTax * 0.10;
+        else tb.surcharge = 0;
+
+        // 5. Professional Tax Disabled
+        tb.professionalTax = 0;
+
+        // 6. Health & Education Cess (4%)
+        tb.cess = (tb.baseIncomeTax + tb.surcharge + tb.capitalGainsTax + tb.cryptoTax) * 0.04;
 
         return tb;
     }
@@ -242,41 +327,37 @@ public class DashboardFragment extends Fragment {
         ArrayList<PieEntry> entries = new ArrayList<>();
         ArrayList<Integer> colors = new ArrayList<>();
 
-        // If nothing is entered at all, show gray placeholder
         if (grossIncome <= 0 && userCapGainsProfit <= 0 && userCryptoProfit <= 0) {
             entries.add(new PieEntry(100f, "Awaiting Data"));
             colors.add(Color.parseColor("#E5E7EB"));
         } else {
-            // Only add slices if the user actually owes that specific tax
             if (breakdown.baseIncomeTax > 0) {
                 entries.add(new PieEntry((float) breakdown.baseIncomeTax, "Income Tax"));
-                colors.add(Color.parseColor("#EF4444")); // Red
+                colors.add(Color.parseColor("#EF4444"));
             }
             if (breakdown.surcharge > 0) {
                 entries.add(new PieEntry((float) breakdown.surcharge, "Surcharge"));
-                colors.add(Color.parseColor("#B91C1C")); // Darker Red
+                colors.add(Color.parseColor("#B91C1C"));
             }
             if (breakdown.capitalGainsTax > 0) {
                 entries.add(new PieEntry((float) breakdown.capitalGainsTax, "Cap Gains Tax"));
-                colors.add(Color.parseColor("#F59E0B")); // Amber
+                colors.add(Color.parseColor("#F59E0B"));
             }
             if (breakdown.cryptoTax > 0) {
                 entries.add(new PieEntry((float) breakdown.cryptoTax, "Crypto Tax"));
-                colors.add(Color.parseColor("#EC4899")); // Pink
+                colors.add(Color.parseColor("#EC4899"));
             }
             if (breakdown.propertyTax > 0) {
                 entries.add(new PieEntry((float) breakdown.propertyTax, "Property Tax"));
-                colors.add(Color.parseColor("#8B5CF6")); // Purple
+                colors.add(Color.parseColor("#8B5CF6"));
             }
             if (breakdown.cess > 0 || breakdown.professionalTax > 0) {
                 entries.add(new PieEntry((float) (breakdown.cess + breakdown.professionalTax), "Cess & Prof. Tax"));
-                colors.add(Color.parseColor("#6366F1")); // Indigo
+                colors.add(Color.parseColor("#6366F1"));
             }
-
-            // Add Take-Home Pay
             if (takeHome > 0) {
                 entries.add(new PieEntry((float) takeHome, "Take-Home Pay"));
-                colors.add(Color.parseColor("#3B82F6")); // Blue
+                colors.add(Color.parseColor("#3B82F6"));
             }
         }
 
@@ -295,47 +376,6 @@ public class DashboardFragment extends Fragment {
 
         taxChart.setData(data);
         taxChart.invalidate();
-    }
-
-    // Unified bulletproof method to recalculate everything
-    private void refreshDashboard() {
-        String incomeStr = editIncome.getText().toString();
-        double grossIncome = 0; // Default to 0 if the box is empty
-
-        // Safely try to read the number
-        if (!incomeStr.trim().isEmpty()) {
-            try {
-                grossIncome = Double.parseDouble(incomeStr);
-            } catch (NumberFormatException e) {
-                // Safely catch if the user types weird characters like multiple decimals
-                grossIncome = 0;
-            }
-        }
-
-        // Calculate math (Even if grossIncome is 0, this creates a safe, non-null breakdown)
-        TaxBreakdown breakdown = calculateComprehensiveTax(grossIncome);
-
-        NumberFormat format = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
-        format.setMaximumFractionDigits(0);
-
-        double totalLiability = breakdown.getTotalLiability();
-        double takeHome = (grossIncome + userCapGainsProfit + userCryptoProfit) - totalLiability;
-
-        // Safely update the Top 4 Cards (The 'if != null' prevents crashes if your XML is out of sync)
-        if (tvIncomeAmount != null) tvIncomeAmount.setText(format.format(grossIncome));
-        if (tvTaxPayableAmount != null) tvTaxPayableAmount.setText(format.format(totalLiability));
-        if (tvTaxPaidAmount != null) tvTaxPaidAmount.setText(format.format(0));
-        if (tvSavingsAmount != null) tvSavingsAmount.setText(format.format(takeHome));
-
-        // Safely update the Bottom 4 Details Cards
-        if (tvCapGainsAmount != null) tvCapGainsAmount.setText(format.format(breakdown.capitalGainsTax));
-        if (tvCryptoTaxAmount != null) tvCryptoTaxAmount.setText(format.format(breakdown.cryptoTax));
-        if (tvPropertyTaxAmount != null) tvPropertyTaxAmount.setText(format.format(breakdown.propertyTax));
-        if (tvCessAmount != null) tvCessAmount.setText(format.format(breakdown.cess + breakdown.professionalTax));
-
-        // Safely update Chart & Insights
-        if (tvTaxInsight != null) updateInsight(grossIncome);
-        if (taxChart != null) updateChartData(grossIncome, breakdown, takeHome);
     }
 
     private void updateInsight(double income) {
