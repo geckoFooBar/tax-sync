@@ -38,16 +38,9 @@ public class TaxesFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 1. Find the RecyclerView
         rvTaxes = view.findViewById(R.id.rvTaxes);
-
-        // 2. Set the Layout Manager (This tells it to scroll vertically like a standard list)
         rvTaxes.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        // 3. Generate Dummy Data
         List<TaxItem> myTaxes = getDummyTaxes();
-
-        // 4. Attach the Adapter
         taxAdapter = new TaxAdapter(myTaxes);
         rvTaxes.setAdapter(taxAdapter);
     }
