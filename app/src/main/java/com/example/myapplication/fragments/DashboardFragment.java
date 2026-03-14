@@ -22,6 +22,7 @@ import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 
@@ -187,6 +188,7 @@ public class DashboardFragment extends Fragment {
 
         SharedPreferences prefs = requireActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         double totalCleared = prefs.getFloat("totalTaxesPaid", 0f);
+
         // Safely update the Top 4 Cards
         if (tvIncomeAmount != null) tvIncomeAmount.setText(format.format(grossIncome));
         if (tvTaxPayableAmount != null) tvTaxPayableAmount.setText(format.format(totalLiability));
@@ -244,6 +246,17 @@ public class DashboardFragment extends Fragment {
         catch (NumberFormatException e) { return 0; }
     }
 
+    // Helper method to calculate base tax (used for marginal relief checks)
+    private double calculateBaseTaxOnly(double taxableIncome) {
+        if (taxableIncome <= 400000) return 0;
+        if (taxableIncome <= 800000) return (taxableIncome - 400000) * 0.05;
+        if (taxableIncome <= 1200000) return 20000 + (taxableIncome - 800000) * 0.10;
+        if (taxableIncome <= 1600000) return 60000 + (taxableIncome - 1200000) * 0.15;
+        if (taxableIncome <= 2000000) return 120000 + (taxableIncome - 1600000) * 0.20;
+        if (taxableIncome <= 2400000) return 200000 + (taxableIncome - 2000000) * 0.25;
+        return 300000 + (taxableIncome - 2400000) * 0.30;
+    }
+
     private TaxBreakdown calculateComprehensiveTax(double income) {
         TaxBreakdown tb = new TaxBreakdown();
 
@@ -251,62 +264,76 @@ public class DashboardFragment extends Fragment {
         tb.totalDeductions = Math.min(income, 75000);
         double taxableIncome = Math.max(0, income - tb.totalDeductions);
 
-        // 2. Base Income Tax (Strictly applying the New Regime Slabs you provided)
-        if (taxableIncome <= 400000) {
-            tb.baseIncomeTax = 0;
-        } else if (taxableIncome <= 800000) {
-            tb.baseIncomeTax = (taxableIncome - 400000) * 0.05;
-        } else if (taxableIncome <= 1200000) {
-            tb.baseIncomeTax = 20000 + (taxableIncome - 800000) * 0.10;
-        } else if (taxableIncome <= 1600000) {
-            tb.baseIncomeTax = 60000 + (taxableIncome - 1200000) * 0.15;
-        } else if (taxableIncome <= 2000000) {
-            tb.baseIncomeTax = 120000 + (taxableIncome - 1600000) * 0.20;
-        } else if (taxableIncome <= 2400000) {
-            tb.baseIncomeTax = 200000 + (taxableIncome - 2000000) * 0.25;
+        // 2. Base Income Tax (Strictly applying the FY 2026-27 New Regime Slabs)
+        tb.baseIncomeTax = calculateBaseTaxOnly(taxableIncome);
+
+        // 3. Section 87A Rebate & Marginal Relief (Updated to ₹12L limit for FY 2026-27)
+        if (taxableIncome <= 1200000) {
+            tb.baseIncomeTax = 0; // Full rebate up to ₹12L
         } else {
-            tb.baseIncomeTax = 300000 + (taxableIncome - 2400000) * 0.30;
+            // Marginal Relief for incomes just above ₹12L
+            double excessIncome = taxableIncome - 1200000;
+            if (tb.baseIncomeTax > excessIncome) {
+                tb.baseIncomeTax = excessIncome;
+            }
         }
 
-        // NOTE: Section 87A Rebate logic has been removed so the user sees the true slab calculation.
-
-        // 3. Custom User Inputs
+        // 4. Custom User Inputs (Special taxes are NOT covered by the Rebate/Relief)
         tb.capitalGainsTax = userCapGainsProfit * 0.125;
         tb.cryptoTax = userCryptoProfit * 0.30;
         tb.propertyTax = userPropertyTax;
 
-        // 4. Tiered Surcharge
+        // 5. Tiered Surcharge & Surcharge Marginal Relief
         double totalIncome = taxableIncome + userCapGainsProfit + userCryptoProfit;
-        if (totalIncome > 20000000) tb.surcharge = tb.baseIncomeTax * 0.25;
-        else if (totalIncome > 10000000) tb.surcharge = tb.baseIncomeTax * 0.15;
-        else if (totalIncome > 5000000) tb.surcharge = tb.baseIncomeTax * 0.10;
-        else tb.surcharge = 0;
 
-        // 5. Professional Tax Disabled
+        if (totalIncome > 5000000) {
+            double surchargeRate = 0;
+            double threshold = 0;
+
+            if (totalIncome > 20000000) {
+                surchargeRate = 0.25;
+                threshold = 20000000;
+            } else if (totalIncome > 10000000) {
+                surchargeRate = 0.15;
+                threshold = 10000000;
+            } else {
+                surchargeRate = 0.10;
+                threshold = 5000000;
+            }
+
+            double calculatedSurcharge = tb.baseIncomeTax * surchargeRate;
+            double totalTaxWithSurcharge = tb.baseIncomeTax + calculatedSurcharge;
+
+            // Calculate fair maximum tax to prevent the surcharge "cliff" penalty
+            double taxAtThreshold = calculateBaseTaxOnly(threshold - 75000);
+            double maxFairTax = taxAtThreshold + (totalIncome - threshold);
+
+            if (totalTaxWithSurcharge > maxFairTax) {
+                calculatedSurcharge = maxFairTax - tb.baseIncomeTax;
+            }
+
+            tb.surcharge = Math.max(0, calculatedSurcharge);
+        } else {
+            tb.surcharge = 0;
+        }
+
+        // 6. Professional Tax Disabled
         tb.professionalTax = 0;
 
-        // 6. Health & Education Cess (4%)
+        // 7. Health & Education Cess (4%)
         tb.cess = (tb.baseIncomeTax + tb.surcharge + tb.capitalGainsTax + tb.cryptoTax) * 0.04;
 
         return tb;
     }
 
     private void setupPieChart() {
-        taxChart.setUsePercentValues(true);
+        taxChart.setUsePercentValues(false);
         taxChart.getDescription().setEnabled(false);
-        taxChart.setExtraOffsets(5, 10, 5, 5);
+        taxChart.setExtraOffsets(20f, 0f, 20f, 0f);
         taxChart.setDrawHoleEnabled(true);
-        taxChart.setHoleColor(Color.WHITE);
-        taxChart.setTransparentCircleColor(Color.WHITE);
-        taxChart.setTransparentCircleAlpha(110);
-        taxChart.setHoleRadius(65f);
-        taxChart.setTransparentCircleRadius(70f);
-        taxChart.setDrawCenterText(true);
-        taxChart.setCenterText("Overview");
-        taxChart.setCenterTextSize(16f);
-        taxChart.setCenterTextColor(Color.parseColor("#111827"));
         taxChart.setRotationEnabled(false);
         taxChart.setHighlightPerTapEnabled(true);
+        taxChart.setDrawEntryLabels(false);
 
         Legend l = taxChart.getLegend();
         l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
@@ -317,8 +344,8 @@ public class DashboardFragment extends Fragment {
         l.setXEntrySpace(12f);
         l.setYEntrySpace(6f);
         l.setYOffset(10f);
-        l.setTextSize(10f);
-        l.setTextColor(Color.parseColor("#6B7280"));
+        l.setTextSize(11f);
+        l.setTextColor(Color.parseColor("#4B5563")); // Darker gray for readability
 
         updateChartData(0, null, 0);
     }
@@ -333,42 +360,54 @@ public class DashboardFragment extends Fragment {
         } else {
             if (breakdown.baseIncomeTax > 0) {
                 entries.add(new PieEntry((float) breakdown.baseIncomeTax, "Income Tax"));
-                colors.add(Color.parseColor("#EF4444"));
+                colors.add(Color.parseColor("#EF4444")); // Red
             }
             if (breakdown.surcharge > 0) {
                 entries.add(new PieEntry((float) breakdown.surcharge, "Surcharge"));
-                colors.add(Color.parseColor("#B91C1C"));
+                colors.add(Color.parseColor("#B91C1C")); // Dark Red
             }
             if (breakdown.capitalGainsTax > 0) {
                 entries.add(new PieEntry((float) breakdown.capitalGainsTax, "Cap Gains Tax"));
-                colors.add(Color.parseColor("#F59E0B"));
+                colors.add(Color.parseColor("#F59E0B")); // Orange
             }
             if (breakdown.cryptoTax > 0) {
                 entries.add(new PieEntry((float) breakdown.cryptoTax, "Crypto Tax"));
-                colors.add(Color.parseColor("#EC4899"));
+                colors.add(Color.parseColor("#EC4899")); // Pink
             }
             if (breakdown.propertyTax > 0) {
                 entries.add(new PieEntry((float) breakdown.propertyTax, "Property Tax"));
-                colors.add(Color.parseColor("#8B5CF6"));
+                colors.add(Color.parseColor("#8B5CF6")); // Purple
             }
             if (breakdown.cess > 0 || breakdown.professionalTax > 0) {
                 entries.add(new PieEntry((float) (breakdown.cess + breakdown.professionalTax), "Cess & Prof. Tax"));
-                colors.add(Color.parseColor("#6366F1"));
+                colors.add(Color.parseColor("#6366F1")); // Indigo
             }
             if (takeHome > 0) {
                 entries.add(new PieEntry((float) takeHome, "Take-Home Pay"));
-                colors.add(Color.parseColor("#3B82F6"));
+                colors.add(Color.parseColor("#3B82F6")); // Blue
             }
         }
 
         PieDataSet dataSet = new PieDataSet(entries, "");
         dataSet.setSliceSpace(2f);
-        dataSet.setSelectionShift(5f);
+        dataSet.setSelectionShift(8f); // Slightly larger pop-out effect
         dataSet.setColors(colors);
 
+        // --- MAGIC STYLING FOR OUTSIDE LABELS ---
+        // This moves the percentages outside the pie with a sleek connector line
+        dataSet.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
+        dataSet.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
+        dataSet.setValueLinePart1OffsetPercentage(80.f);
+        dataSet.setValueLinePart1Length(0.4f);
+        dataSet.setValueLinePart2Length(0.2f);
+        dataSet.setValueLineColor(Color.parseColor("#9CA3AF")); // Gray connector lines
+
         PieData data = new PieData(dataSet);
-        data.setValueTextSize(9f);
-        data.setValueTextColor(Color.WHITE);
+        data.setValueTextSize(12f); // Much larger and readable
+        data.setValueTextColor(Color.parseColor("#111827")); // Dark text color
+
+        // Automatically formats the raw numbers into neat percentages (e.g., "14.5%")
+        data.setValueFormatter(new PercentFormatter(taxChart));
 
         if (grossIncome == 0 && userCapGainsProfit == 0 && userCryptoProfit == 0) {
             data.setDrawValues(false);
@@ -380,7 +419,7 @@ public class DashboardFragment extends Fragment {
 
     private void updateInsight(double income) {
         if (income == 0) tvTaxInsight.setText("Enter your income to calculate your exact tax liability and discover deductions.");
-        else if (income < 700000) tvTaxInsight.setText("Great news! You may qualify for a full tax rebate under Section 87A.");
+        else if (income <= 1275000) tvTaxInsight.setText("Great news! You qualify for a full tax rebate under Section 87A. Your base tax is zero!");
         else if (income < 1500000) tvTaxInsight.setText("Your portfolio is active. Consider increasing equity investments to leverage LTCG limits.");
         else tvTaxInsight.setText("High bracket detected. Be aware of the 30% flat tax on VDA/Crypto assets and municipal property levies.");
     }

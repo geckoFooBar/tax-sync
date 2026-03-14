@@ -107,17 +107,9 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="20dp"
             app:layout_constraintTop_toBottomOf="@id/gridStats">
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Tax Breakdown"
-                android:textColor="#111827"
-                android:textSize="18sp"
-                android:textStyle="bold" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAddAssets"
@@ -135,6 +127,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Clear"
+                android:layout_marginLeft="100dp"
                 android:textColor="#EF4444"
                 android:textSize="14sp"
                 app:rippleColor="#FEF2F2" />
@@ -143,7 +136,7 @@
         <com.github.mikephil.charting.charts.PieChart
             android:id="@+id/taxChart"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="350dp"
             android:layout_marginHorizontal="24dp"
             android:layout_marginTop="16dp"
             app:layout_constraintTop_toBottomOf="@id/headerChart" />
