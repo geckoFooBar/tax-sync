@@ -1,13 +1,16 @@
 package com.example.myapplication.adapters;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Rect;
+import android.text.InputFilter;
+import android.text.method.TransformationMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -71,24 +74,38 @@ public class TaxAdapter extends RecyclerView.Adapter<TaxAdapter.TaxViewHolder> {
         View sheetView = LayoutInflater.from(context).inflate(R.layout.layout_bottom_sheet_payment, null);
         dialog.setContentView(sheetView);
 
-        // Standard UI bindings...
         TextView tvPaymentTaxName = sheetView.findViewById(R.id.tvPaymentTaxName);
         TextView tvPaymentAmount = sheetView.findViewById(R.id.tvPaymentAmount);
         com.google.android.material.button.MaterialButton btnConfirmPayment = sheetView.findViewById(R.id.btnConfirmPayment);
 
-        // Payment containers and inputs
         View containerUPI = sheetView.findViewById(R.id.containerUPI);
         View containerNetBanking = sheetView.findViewById(R.id.containerNetBanking);
         View containerCard = sheetView.findViewById(R.id.containerCard);
 
+        RadioGroup radioGroup = sheetView.findViewById(R.id.rgPaymentMethods);
+        RadioButton rbUPI = sheetView.findViewById(R.id.rbUPI);
+        RadioButton rbNetBanking = sheetView.findViewById(R.id.rbNetBanking);
+        RadioButton rbCard = sheetView.findViewById(R.id.rbCard);
+
         TextInputEditText etUPI = sheetView.findViewById(R.id.etUPI);
+        TextInputEditText etNetBanking = sheetView.findViewById(R.id.etNetBanking);
         TextInputEditText etCardPayment = sheetView.findViewById(R.id.etCardPayment);
-        // Find the MM/YY EditText (you'll need to add an ID in XML or find by position)
+
         TextInputEditText etExpiry = sheetView.findViewById(R.id.etExpiry);
-        // Note: It's better to add android:id="@+id/etExpiry" to your XML for the MM/YY field.
 
         tvPaymentTaxName.setText(item.getTaxName());
         tvPaymentAmount.setText(item.getDisplayAmount());
+
+        radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            containerUPI.setVisibility(checkedId == rbUPI.getId() ? View.VISIBLE : View.GONE);
+            containerNetBanking.setVisibility(checkedId == rbNetBanking.getId() ? View.VISIBLE : View.GONE);
+            containerCard.setVisibility(checkedId == rbCard.getId() ? View.VISIBLE: View.GONE);
+        });
+
+        etCardPayment.setFilters(new InputFilter[] {
+          new InputFilter.LengthFilter(16)
+        });
+
 
         etExpiry.addTextChangedListener(new android.text.TextWatcher() {
             private boolean isUpdating = false;
@@ -103,18 +120,16 @@ public class TaxAdapter extends RecyclerView.Adapter<TaxAdapter.TaxViewHolder> {
                 String input = s.toString().replace("/", "");
                 StringBuilder formatted = new StringBuilder();
 
+                if (input.length() >= 2) {
+                    int month = Integer.parseInt(input.substring(0, 2));
+                    if (month > 12 || month == 0) return;
+                }
+
                 for (int i = 0; i < input.length(); i++) {
                     char c = input.charAt(i);
-
-                    // Month validation logic
-                    if (i == 0 && c > '1') return; // First digit of month can't be > 1
-                    if (i == 1) {
-                        int month = Integer.parseInt(input.substring(0, 2));
-                        if (month > 12 || month == 0) return; // Month can't be > 12 or 00
-                    }
+                    if (i == 0 && c > '1') return;
 
                     formatted.append(c);
-                    // Auto-insert slash after MM
                     if (i == 1 && input.length() > 2) {
                         formatted.append("/");
                     }
@@ -130,10 +145,9 @@ public class TaxAdapter extends RecyclerView.Adapter<TaxAdapter.TaxViewHolder> {
             public void afterTextChanged(android.text.Editable s) {}
         });
 
-        btnConfirmPayment.setOnClickListener(v -> {
-            // --- 2. Validation Logic ---
 
-            // UPI Validation
+        btnConfirmPayment.setOnClickListener(v -> {
+
             if (containerUPI.getVisibility() == View.VISIBLE) {
                 String upi = etUPI.getText().toString().trim();
                 if (!upi.matches("^[\\w.-]+@[\\w.-]+$")) {
@@ -142,7 +156,14 @@ public class TaxAdapter extends RecyclerView.Adapter<TaxAdapter.TaxViewHolder> {
                 }
             }
 
-            // Card Length Validation
+            if (containerNetBanking.getVisibility() == View.VISIBLE) {
+                String bankName = etNetBanking.getText().toString().trim();
+                if (bankName.isEmpty()) {
+                    etNetBanking.setError("Enter bank name");
+                    return;
+                }
+            }
+
             if (containerCard.getVisibility() == View.VISIBLE) {
                 if (etCardPayment.getText().toString().length() != 16) {
                     etCardPayment.setError("Card number must be 16 digits");
@@ -150,7 +171,6 @@ public class TaxAdapter extends RecyclerView.Adapter<TaxAdapter.TaxViewHolder> {
                 }
             }
 
-            // Process Payment (Existing Logic)
             item.setPaid(true);
             notifyItemChanged(position);
 
