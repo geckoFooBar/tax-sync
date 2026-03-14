@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="CalendarDateText">
-        <item name="android:textColor">@color/calendar_header_text</item>
+    <style name="CustomCalendarTheme" parent="ThemeOverlay.MaterialComponents.Light">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorAccent">@color/primary</item>
+        <item name="colorControlActivated">@color/primary</item>
     </style>
-
-    <style name="CalendarWeekText">
-        <item name="android:textColor">@color/calendar_header_text</item>
-    </style>
-
 </resources>
