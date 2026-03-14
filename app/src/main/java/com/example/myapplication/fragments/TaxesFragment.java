@@ -24,9 +24,7 @@ public class TaxesFragment extends Fragment {
     private RecyclerView rvTaxes;
     private TaxAdapter taxAdapter;
 
-    public TaxesFragment() {
-        // Required empty public constructor
-    }
+    public TaxesFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
