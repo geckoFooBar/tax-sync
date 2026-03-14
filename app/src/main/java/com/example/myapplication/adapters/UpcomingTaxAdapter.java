@@ -45,7 +45,7 @@ public class UpcomingTaxAdapter extends RecyclerView.Adapter<UpcomingTaxAdapter.
         TaxItem t = list.get(pos);
         h.name.setText(t.getTaxName());
         h.date.setText("Due: " + t.getDueDate());
-        h.amount.setText(t.getAmount());
+        h.amount.setText(t.getDisplayAmount());
     }
 
     @Override
