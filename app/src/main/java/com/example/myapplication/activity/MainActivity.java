@@ -1,8 +1,11 @@
 package com.example.myapplication.activity;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
 import com.example.myapplication.R;
@@ -22,9 +25,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        SharedPreferences prefs = getSharedPreferences("TaxAppPrefs", Context.MODE_PRIVATE);
+        boolean isDarkMode = prefs.getBoolean("isDarkMode", false);
+
+        if (isDarkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
-        //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        // Default screen
         loadFragment(new DashboardFragment());
 
         bottomNav.setOnItemSelectedListener(item -> {
