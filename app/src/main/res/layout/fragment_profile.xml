@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@color/screen_bg"
     android:orientation="vertical">
 
     <LinearLayout
@@ -16,9 +16,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="44dp"
+            android:layout_marginTop="40dp"
             android:text="Profile"
-            android:textColor="#111827"
+            android:textColor="@color/text_main"
             android:textSize="22sp"
             android:textStyle="bold" />
 
@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="Manage your account and settings."
-            android:textColor="#6B7280"
+            android:textColor="@color/text_sub"
             android:textSize="14sp" />
     </LinearLayout>
 
@@ -47,10 +47,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/card_bg"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:strokeColor="#F3F4F6"
+                app:strokeColor="@color/card_stroke"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -63,7 +63,7 @@
                     <LinearLayout
                         android:layout_width="56dp"
                         android:layout_height="56dp"
-                        android:background="@drawable/circle_bg"
+                        android:background="@color/info_blue"
                         android:backgroundTint="#EFF6FF"
                         android:gravity="center">
 
@@ -72,7 +72,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="JD"
-                            android:textColor="#3B82F6"
+                            android:textColor="@color/brand_primary"
                             android:textSize="20sp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -89,7 +89,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="John Doe"
-                            android:textColor="#111827"
+                            android:textColor="@color/text_main"
                             android:textSize="18sp"
                             android:textStyle="bold" />
 
@@ -99,7 +99,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text="john.doe@email.com"
-                            android:textColor="#6B7280"
+                            android:textColor="@color/text_sub"
                             android:textSize="14sp" />
                     </LinearLayout>
                 </LinearLayout>
@@ -109,16 +109,51 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="32dp"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/card_bg"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:strokeColor="#F3F4F6"
+                app:strokeColor="@color/card_stroke"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Dark Mode"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <Space
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1" />
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/switchTheme"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:thumbTint="@color/info_blue"
+                            app:trackTint="@color/divider_bg"/>
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginHorizontal="16dp"
+                        android:background="@color/divider_bg" />
 
                     <TextView
                         android:id="@+id/btnSettings"
@@ -129,17 +164,17 @@
                         android:focusable="true"
                         android:padding="16dp"
                         android:text="Account Settings"
-                        android:textColor="#374151"
+                        android:textColor="@color/text_secondary"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         app:drawableEndCompat="@android:drawable/ic_media_next"
-                        app:drawableTint="#9CA3AF" />
+                        app:drawableTint="@color/icon_tint" />
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:layout_marginHorizontal="16dp"
-                        android:background="#F3F4F6" />
+                        android:background="@color/divider_bg" />
 
                     <TextView
                         android:id="@+id/btnTaxHistory"
@@ -150,17 +185,17 @@
                         android:focusable="true"
                         android:padding="16dp"
                         android:text="Filing History"
-                        android:textColor="#374151"
+                        android:textColor="@color/text_secondary"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         app:drawableEndCompat="@android:drawable/ic_media_next"
-                        app:drawableTint="#9CA3AF" />
+                        app:drawableTint="@color/icon_tint" />
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:layout_marginHorizontal="16dp"
-                        android:background="#F3F4F6" />
+                        android:background="@color/divider_bg" />
 
                     <TextView
                         android:id="@+id/btnHelp"
@@ -171,11 +206,11 @@
                         android:focusable="true"
                         android:padding="16dp"
                         android:text="Help &amp; Support"
-                        android:textColor="#374151"
+                        android:textColor="@color/text_secondary"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         app:drawableEndCompat="@android:drawable/ic_media_next"
-                        app:drawableTint="#9CA3AF" />
+                        app:drawableTint="@color/icon_tint" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -184,12 +219,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:text="Log Out"
-                android:textColor="#EF4444"
+                android:textColor="@color/error_text"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                app:backgroundTint="#FEF2F2"
+                app:backgroundTint="@color/error_bg"
                 app:cornerRadius="12dp"
-                app:strokeColor="#FECACA"
+                app:strokeColor="@color/error_stroke"
                 app:strokeWidth="1dp" />
 
         </LinearLayout>
