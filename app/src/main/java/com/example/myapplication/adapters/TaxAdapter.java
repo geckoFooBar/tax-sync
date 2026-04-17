@@ -1,7 +1,6 @@
 package com.example.myapplication.adapters;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.text.InputFilter;
 import android.view.LayoutInflater;
@@ -23,10 +22,18 @@ import java.util.List;
 
 public class TaxAdapter extends RecyclerView.Adapter<TaxAdapter.TaxViewHolder> {
 
-    private List<TaxItem> taxList;
+    private final List<TaxItem> taxList;
+    private final OnTaxPaymentListener paymentListener; // NEW: Listener variable
 
-    public TaxAdapter(List<TaxItem> taxList) {
+    // NEW: Define the interface so the Fragment can listen
+    public interface OnTaxPaymentListener {
+        void onTaxPaid(int position);
+    }
+
+    // NEW: Updated constructor to accept the listener from TaxesFragment
+    public TaxAdapter(List<TaxItem> taxList, OnTaxPaymentListener listener) {
         this.taxList = taxList;
+        this.paymentListener = listener;
     }
 
     @NonNull
@@ -45,15 +52,15 @@ public class TaxAdapter extends RecyclerView.Adapter<TaxAdapter.TaxViewHolder> {
         holder.tvTaxSubtitle.setText("Due: " + item.getDueDate());
         holder.tvTaxAmount.setText(item.getDisplayAmount());
 
-        // 1. Color Code the Badge (Red = Due, Green = Paid)
+        // Color Code the Badge
         if (item.isPaid()) {
             holder.tvStatusBadge.setText("PAID");
-            holder.tvStatusBadge.setTextColor(Color.parseColor("#10B981")); // Green Text
-            holder.tvStatusBadge.setBackgroundColor(Color.parseColor("#ECFDF5")); // Light Green Bg
+            holder.tvStatusBadge.setTextColor(Color.parseColor("#10B981"));
+            holder.tvStatusBadge.setBackgroundColor(Color.parseColor("#ECFDF5"));
         } else {
             holder.tvStatusBadge.setText("PENDING");
-            holder.tvStatusBadge.setTextColor(Color.parseColor("#EF4444")); // Red Text
-            holder.tvStatusBadge.setBackgroundColor(Color.parseColor("#FEF2F2")); // Light Red Bg
+            holder.tvStatusBadge.setTextColor(Color.parseColor("#EF4444"));
+            holder.tvStatusBadge.setBackgroundColor(Color.parseColor("#FEF2F2"));
         }
 
         holder.itemView.setOnClickListener(v -> {
@@ -101,9 +108,8 @@ public class TaxAdapter extends RecyclerView.Adapter<TaxAdapter.TaxViewHolder> {
         });
 
         etCardPayment.setFilters(new InputFilter[] {
-          new InputFilter.LengthFilter(16)
+                new InputFilter.LengthFilter(16)
         });
-
 
         etExpiry.addTextChangedListener(new android.text.TextWatcher() {
             private boolean isUpdating = false;
@@ -143,7 +149,6 @@ public class TaxAdapter extends RecyclerView.Adapter<TaxAdapter.TaxViewHolder> {
             public void afterTextChanged(android.text.Editable s) {}
         });
 
-
         btnConfirmPayment.setOnClickListener(v -> {
 
             if (containerUPI.getVisibility() == View.VISIBLE) {
@@ -169,18 +174,13 @@ public class TaxAdapter extends RecyclerView.Adapter<TaxAdapter.TaxViewHolder> {
                 }
             }
 
-            item.setPaid(true);
-            notifyItemChanged(position);
-
-            SharedPreferences prefs = context.getSharedPreferences("TaxAppPrefs", Context.MODE_PRIVATE);
-            prefs.edit().putBoolean("status_" + item.getTaxName(), true).apply();
-
-            float currentTotalPaid = prefs.getFloat("totalTaxesPaid", 0f);
-            float newTotal = currentTotalPaid + (float) item.getNumericAmount();
-            prefs.edit().putFloat("totalTaxesPaid", newTotal).apply();
-
+            // NEW: Instead of doing the math here, we just alert the Fragment!
             dialog.dismiss();
             Toast.makeText(context, "Payment Processed!", Toast.LENGTH_LONG).show();
+
+            if (paymentListener != null) {
+                paymentListener.onTaxPaid(position);
+            }
         });
 
         dialog.show();
@@ -201,4 +201,3 @@ public class TaxAdapter extends RecyclerView.Adapter<TaxAdapter.TaxViewHolder> {
         }
     }
 }
-
