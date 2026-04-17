@@ -5,8 +5,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CalendarView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,18 +12,25 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+// IMPORTANT: These are the new imports replacing android.widget.CalendarView
+import com.applandeo.materialcalendarview.CalendarView;
+import com.applandeo.materialcalendarview.EventDay;
+
 import com.example.myapplication.R;
 import com.example.myapplication.adapters.CalendarTaxAdapter;
 import com.example.myapplication.model.TaxItem;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 public class CalendarFragment extends Fragment {
 
-    private CalendarView calendarView;
-    private RecyclerView rvCalendarTaxes;
+    private CalendarView calendarView; // Now uses the custom widget
     private CalendarTaxAdapter adapter;
     private List<TaxItem> allTaxesMasterList;
 
@@ -41,26 +46,58 @@ public class CalendarFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         calendarView = view.findViewById(R.id.calendarView);
-        rvCalendarTaxes = view.findViewById(R.id.rvCalendarTaxes);
+        RecyclerView rvCalendarTaxes = view.findViewById(R.id.rvCalendarTaxes);
 
         // Setup Recycler View
         rvCalendarTaxes.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Load dummy data (Notice the DD/MM/YYYY format to make matching exact)
         allTaxesMasterList = getDummyTaxes();
 
-        // Initialize adapter with ALL taxes first, or an empty list. Let's show all initially.
+        // Initialize adapter
         adapter = new CalendarTaxAdapter(allTaxesMasterList);
         rvCalendarTaxes.setAdapter(adapter);
 
-        // Listen for user clicking on dates!
-        calendarView.setOnDateChangeListener((view1, year, month, dayOfMonth) -> {
-            // Android months are 0-indexed (Jan = 0), so we add 1.
-            // We use %02d to ensure single digits have a leading zero (e.g., "05" instead of "5")
-            String selectedDate = String.format(Locale.getDefault(), "%02d/%02d/%04d", dayOfMonth, month + 1, year);
+        // --- NEW: Map taxes to the calendar with Red/Green dots ---
+        highlightTaxDates();
+
+        // --- NEW: Updated Click Listener for the library ---
+        calendarView.setOnDayClickListener(eventDay -> {
+            Calendar clickedDayCalendar = eventDay.getCalendar();
+
+            // Reconstruct the DD/MM/YYYY format to match your logic
+            String selectedDate = String.format(Locale.getDefault(), "%02d/%02d/%04d",
+                    clickedDayCalendar.get(Calendar.DAY_OF_MONTH),
+                    clickedDayCalendar.get(Calendar.MONTH) + 1,
+                    clickedDayCalendar.get(Calendar.YEAR));
 
             filterTaxesByDate(selectedDate);
         });
+    }
+
+    // NEW METHOD: Generates the dots on the calendar
+    private void highlightTaxDates() {
+        List<EventDay> events = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
+        for (TaxItem item : allTaxesMasterList) {
+            try {
+                Date date = sdf.parse(item.getDueDate());
+                if (date != null) {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(date);
+
+                    // Pick the drawable based on paid status
+                    int drawableRes = item.isPaid() ? R.drawable.dot_green : R.drawable.dot_red;
+
+                    events.add(new EventDay(calendar, drawableRes));
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Push the dots to the calendar UI
+        calendarView.setEvents(events);
     }
 
     private void filterTaxesByDate(String targetDate) {
@@ -71,24 +108,27 @@ public class CalendarFragment extends Fragment {
                 filteredList.add(item);
             }
         }
-
-        // Push the filtered list to the adapter
         adapter.updateData(filteredList);
     }
 
-    // Hardcoded dummy data for testing the calendar clicks
     private List<TaxItem> getDummyTaxes() {
         List<TaxItem> list = new ArrayList<>();
 
-        // Set these dates to upcoming days on your calendar to test the click filter!
+        list.add(new TaxItem("GSTR-1 (March)", "11/04/2026", "₹12,400", 12400, true));
+        list.add(new TaxItem("Provident Fund (March)", "15/04/2026", "₹4,500", 4500, true));
+        list.add(new TaxItem("GSTR-3B (March)", "20/04/2026", "₹38,000", 38000, false));
+        list.add(new TaxItem("TDS Payment (March)", "30/04/2026", "₹8,200", 8200, false));
+        list.add(new TaxItem("TDS Return (Q4)", "31/05/2026", "₹0", 0, false));
+        list.add(new TaxItem("Professional Tax", "31/05/2026", "₹200", 200, false));
         list.add(new TaxItem("Advance Tax (Q1)", "15/06/2026", "₹45,000", 45000, false));
-        list.add(new TaxItem("Capital Gains (LTCG)", "31/07/2026", "₹12,500", 12500, false));
-        list.add(new TaxItem("Municipal Property Tax", "31/03/2026", "₹24,000", 24000, false)); // Already Paid Example
+        list.add(new TaxItem("GSTR-3B (May)", "20/06/2026", "₹15,600", 15600, false));
+        list.add(new TaxItem("Income Tax Return (ITR)", "31/07/2026", "₹12,500", 12500, false));
         list.add(new TaxItem("Crypto / VDA Tax", "31/07/2026", "₹8,300", 8300, false));
+        list.add(new TaxItem("Advance Tax (Q2)", "15/09/2026", "₹45,000", 45000, false));
+        list.add(new TaxItem("Municipal Property Tax", "30/09/2026", "₹24,000", 24000, false));
 
         SharedPreferences prefs = requireActivity().getSharedPreferences("TaxAppPrefs", android.content.Context.MODE_PRIVATE);
         for (TaxItem item : list) {
-            // Looks for a saved boolean like "status_Advance Tax (Q1)". If it doesn't exist, it defaults to the item's current status.
             boolean isAlreadyPaid = prefs.getBoolean("status_" + item.getTaxName(), item.isPaid());
             item.setPaid(isAlreadyPaid);
         }
