@@ -304,10 +304,4 @@ public class DocumentsFragment extends Fragment {
                 });
     }
 
-    private List<DocumentItem> getRequiredDocuments() {
-        List<DocumentItem> list = new ArrayList<>();
-        list.add(new DocumentItem("PAN Card", "JPG", 0)); // Missing
-        list.add(new DocumentItem("Aadhar Card", "PDF", 2));
-        return list;
-    }
 }

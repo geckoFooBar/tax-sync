@@ -66,7 +66,6 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
             holder.tvDocAction.setTextColor(Color.parseColor("#3B82F6"));
         }
 
-        // 3. Trigger the listener if it's a missing document!
         holder.itemView.setOnClickListener(v -> {
             if (item.getStatus() == 0) {
                 listener.onUploadClicked(item);
