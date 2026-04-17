@@ -6,19 +6,9 @@
     android:background="#FFFFFF"
     android:orientation="vertical">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="24dp"
-        android:paddingTop="32dp"
-        android:paddingBottom="16dp"
-        android:text="Tax Calendar"
-        android:textColor="#111827"
-        android:textSize="22sp"
-        android:textStyle="bold" />
-
     <CalendarView
         android:id="@+id/calendarView"
+        android:layout_marginTop="44dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"

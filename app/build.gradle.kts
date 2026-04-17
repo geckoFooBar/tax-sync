@@ -26,6 +26,7 @@ android {
 
         buildConfigField("String", "SUPABASE_URL", "\"${localProps["SUPABASE_URL"]}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProps["SUPABASE_ANON_KEY"]}\"")
+        buildConfigField("String", "SUPABASE_BUCKET_NAME", "\"${localProps["SUPABASE_BUCKET_NAME"]}\"")
     }
 
     buildTypes {

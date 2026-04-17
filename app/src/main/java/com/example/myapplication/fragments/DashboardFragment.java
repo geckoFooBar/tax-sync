@@ -327,13 +327,19 @@ public class DashboardFragment extends Fragment {
     }
 
     private void setupPieChart() {
-        taxChart.setUsePercentValues(false);
+        taxChart.setUsePercentValues(true);
         taxChart.getDescription().setEnabled(false);
         taxChart.setExtraOffsets(20f, 0f, 20f, 0f);
         taxChart.setDrawHoleEnabled(true);
+        taxChart.setHoleRadius(52f);
+        taxChart.setTransparentCircleRadius(57f);
+        taxChart.setHoleColor(Color.TRANSPARENT);
         taxChart.setRotationEnabled(false);
         taxChart.setHighlightPerTapEnabled(true);
         taxChart.setDrawEntryLabels(false);
+        taxChart.setCenterText("Tax\nBreakdown");
+        taxChart.setCenterTextSize(14f);
+        taxChart.setCenterTextColor(Color.parseColor("#374151"));
 
         Legend l = taxChart.getLegend();
         l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
@@ -345,7 +351,7 @@ public class DashboardFragment extends Fragment {
         l.setYEntrySpace(6f);
         l.setYOffset(10f);
         l.setTextSize(11f);
-        l.setTextColor(Color.parseColor("#4B5563")); // Darker gray for readability
+        l.setTextColor(Color.parseColor("#4B5563"));
 
         updateChartData(0, null, 0);
     }
@@ -354,62 +360,69 @@ public class DashboardFragment extends Fragment {
         ArrayList<PieEntry> entries = new ArrayList<>();
         ArrayList<Integer> colors = new ArrayList<>();
 
-        if (grossIncome <= 0 && userCapGainsProfit <= 0 && userCryptoProfit <= 0) {
-            entries.add(new PieEntry(100f, "Awaiting Data"));
+        boolean hasNoData = grossIncome <= 0 && userCapGainsProfit <= 0 && userCryptoProfit <= 0;
+
+        if (hasNoData || breakdown == null) {
+            entries.add(new PieEntry(100f, "No Data"));
             colors.add(Color.parseColor("#E5E7EB"));
+            taxChart.setCenterText("Tax\nBreakdown");
         } else {
-            if (breakdown.baseIncomeTax > 0) {
-                entries.add(new PieEntry((float) breakdown.baseIncomeTax, "Income Tax"));
-                colors.add(Color.parseColor("#EF4444")); // Red
-            }
-            if (breakdown.surcharge > 0) {
-                entries.add(new PieEntry((float) breakdown.surcharge, "Surcharge"));
-                colors.add(Color.parseColor("#B91C1C")); // Dark Red
-            }
-            if (breakdown.capitalGainsTax > 0) {
-                entries.add(new PieEntry((float) breakdown.capitalGainsTax, "Cap Gains Tax"));
-                colors.add(Color.parseColor("#F59E0B")); // Orange
-            }
-            if (breakdown.cryptoTax > 0) {
-                entries.add(new PieEntry((float) breakdown.cryptoTax, "Crypto Tax"));
-                colors.add(Color.parseColor("#EC4899")); // Pink
-            }
-            if (breakdown.propertyTax > 0) {
-                entries.add(new PieEntry((float) breakdown.propertyTax, "Property Tax"));
-                colors.add(Color.parseColor("#8B5CF6")); // Purple
-            }
-            if (breakdown.cess > 0 || breakdown.professionalTax > 0) {
-                entries.add(new PieEntry((float) (breakdown.cess + breakdown.professionalTax), "Cess & Prof. Tax"));
-                colors.add(Color.parseColor("#6366F1")); // Indigo
-            }
-            if (takeHome > 0) {
-                entries.add(new PieEntry((float) takeHome, "Take-Home Pay"));
-                colors.add(Color.parseColor("#3B82F6")); // Blue
+            double totalTax = breakdown.getTotalLiability();
+
+            if (totalTax <= 0) {
+                // Zero tax scenario — show a friendly full green ring
+                entries.add(new PieEntry(100f, "Zero Tax 🎉"));
+                colors.add(Color.parseColor("#22C55E"));
+                taxChart.setCenterText("₹0\nTax Due");
+            } else {
+                if (breakdown.baseIncomeTax > 0) {
+                    entries.add(new PieEntry((float) breakdown.baseIncomeTax, "Income Tax"));
+                    colors.add(Color.parseColor("#EF4444"));
+                }
+                if (breakdown.surcharge > 0) {
+                    entries.add(new PieEntry((float) breakdown.surcharge, "Surcharge"));
+                    colors.add(Color.parseColor("#B91C1C"));
+                }
+                if (breakdown.capitalGainsTax > 0) {
+                    entries.add(new PieEntry((float) breakdown.capitalGainsTax, "Cap Gains"));
+                    colors.add(Color.parseColor("#F59E0B"));
+                }
+                if (breakdown.cryptoTax > 0) {
+                    entries.add(new PieEntry((float) breakdown.cryptoTax, "Crypto Tax"));
+                    colors.add(Color.parseColor("#EC4899"));
+                }
+                if (breakdown.propertyTax > 0) {
+                    entries.add(new PieEntry((float) breakdown.propertyTax, "Property Tax"));
+                    colors.add(Color.parseColor("#8B5CF6"));
+                }
+                if (breakdown.cess + breakdown.professionalTax > 0) {
+                    entries.add(new PieEntry((float) (breakdown.cess + breakdown.professionalTax), "Cess & P.Tax"));
+                    colors.add(Color.parseColor("#6366F1"));
+                }
+
+                NumberFormat fmt = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
+                fmt.setMaximumFractionDigits(0);
+                taxChart.setCenterText("Total Tax\n" + fmt.format(totalTax));
             }
         }
 
         PieDataSet dataSet = new PieDataSet(entries, "");
-        dataSet.setSliceSpace(2f);
-        dataSet.setSelectionShift(8f); // Slightly larger pop-out effect
+        dataSet.setSliceSpace(3f);
+        dataSet.setSelectionShift(8f);
         dataSet.setColors(colors);
-
-        // --- MAGIC STYLING FOR OUTSIDE LABELS ---
-        // This moves the percentages outside the pie with a sleek connector line
         dataSet.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
         dataSet.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
-        dataSet.setValueLinePart1OffsetPercentage(80.f);
+        dataSet.setValueLinePart1OffsetPercentage(80f);
         dataSet.setValueLinePart1Length(0.4f);
         dataSet.setValueLinePart2Length(0.2f);
-        dataSet.setValueLineColor(Color.parseColor("#9CA3AF")); // Gray connector lines
+        dataSet.setValueLineColor(Color.parseColor("#9CA3AF"));
 
         PieData data = new PieData(dataSet);
-        data.setValueTextSize(12f); // Much larger and readable
-        data.setValueTextColor(Color.parseColor("#111827")); // Dark text color
-
-        // Automatically formats the raw numbers into neat percentages (e.g., "14.5%")
+        data.setValueTextSize(12f);
+        data.setValueTextColor(Color.parseColor("#111827"));
         data.setValueFormatter(new PercentFormatter(taxChart));
 
-        if (grossIncome == 0 && userCapGainsProfit == 0 && userCryptoProfit == 0) {
+        if (hasNoData || breakdown == null) {
             data.setDrawValues(false);
         }
 

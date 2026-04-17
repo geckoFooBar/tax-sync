@@ -83,7 +83,7 @@ public class CalendarFragment extends Fragment {
         // Set these dates to upcoming days on your calendar to test the click filter!
         list.add(new TaxItem("Advance Tax (Q1)", "15/06/2026", "₹45,000", 45000, false));
         list.add(new TaxItem("Capital Gains (LTCG)", "31/07/2026", "₹12,500", 12500, false));
-        list.add(new TaxItem("Municipal Property Tax", "31/03/2026", "₹24,000", 24000, true)); // Already Paid Example
+        list.add(new TaxItem("Municipal Property Tax", "31/03/2026", "₹24,000", 24000, false)); // Already Paid Example
         list.add(new TaxItem("Crypto / VDA Tax", "31/07/2026", "₹8,300", 8300, false));
 
         SharedPreferences prefs = requireActivity().getSharedPreferences("TaxAppPrefs", android.content.Context.MODE_PRIVATE);

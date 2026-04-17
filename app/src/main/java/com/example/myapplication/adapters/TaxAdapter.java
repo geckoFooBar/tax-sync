@@ -201,3 +201,4 @@ public class TaxAdapter extends RecyclerView.Adapter<TaxAdapter.TaxViewHolder> {
         }
     }
 }
+

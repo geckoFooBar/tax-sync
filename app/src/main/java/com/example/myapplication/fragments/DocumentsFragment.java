@@ -111,7 +111,6 @@ public class DocumentsFragment extends Fragment {
 
         String userId = currentUser.getUid();
 
-        // Ask Firestore for all documents belonging to this specific user
         firestore.collection("uploaded_documents")
                 .whereEqualTo("userId", userId)
                 .get()
@@ -160,7 +159,7 @@ public class DocumentsFragment extends Fragment {
         String userId = auth.getCurrentUser().getUid();
         String SUPABASE_URL = BuildConfig.SUPABASE_URL;
         String SUPABASE_ANON_KEY = BuildConfig.SUPABASE_ANON_KEY;
-        String BUCKET_NAME = "tax_sync_uploads";
+        String BUCKET_NAME = BuildConfig.SUPABASE_BUCKET_NAME;
 
         ProgressDialog progressDialog = new ProgressDialog(getContext());
         progressDialog.setTitle("Securing Document");
