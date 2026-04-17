@@ -23,9 +23,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputLayout emailLayout, passwordLayout;
     private CheckBox rememberMe;
     private MaterialButton loginButton;
-    private TextView signupText;
 
-    // Declare FirebaseAuth
     private FirebaseAuth mAuth;
 
     @Override
@@ -51,7 +49,7 @@ public class LoginActivity extends AppCompatActivity {
         passwordLayout = findViewById(R.id.passwordLayout);
         rememberMe = findViewById(R.id.rememberMe);
         loginButton = findViewById(R.id.loginButton);
-        signupText = findViewById(R.id.signupText);
+        TextView signupText = findViewById(R.id.signupText);
 
         loginButton.setOnClickListener(v -> loginUser());
 
@@ -67,7 +65,6 @@ public class LoginActivity extends AppCompatActivity {
         emailLayout.setError(null);
         passwordLayout.setError(null);
 
-        // Validation
         if (email.isEmpty()) { emailLayout.setError("Email is required"); return; }
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) { emailLayout.setError("Enter a valid email"); return; }
         if (password.isEmpty()) { passwordLayout.setError("Password is required"); return; }
