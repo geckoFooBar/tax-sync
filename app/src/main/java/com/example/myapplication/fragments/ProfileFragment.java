@@ -12,6 +12,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.myapplication.R;
@@ -20,13 +22,7 @@ import com.google.android.material.button.MaterialButton;
 
 public class ProfileFragment extends Fragment {
 
-    private MaterialButton logoutButton;
-    private TextView profileName, profileEmail, profileInitials;
-    private TextView btnSettings, btnTaxHistory, btnHelp;
-
-    public ProfileFragment() {
-        // Required empty public constructor
-    }
+    public ProfileFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -38,18 +34,22 @@ public class ProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // 1. Bind UI Elements
-        profileName = view.findViewById(R.id.profileName);
-        profileEmail = view.findViewById(R.id.profileEmail);
-        profileInitials = view.findViewById(R.id.profileInitials);
-        logoutButton = view.findViewById(R.id.logoutButton);
+        TextView profileName = view.findViewById(R.id.profileName);
+        TextView profileEmail = view.findViewById(R.id.profileEmail);
+        TextView profileInitials = view.findViewById(R.id.profileInitials);
+        MaterialButton logoutButton = view.findViewById(R.id.logoutButton);
 
-        btnSettings = view.findViewById(R.id.btnSettings);
-        btnTaxHistory = view.findViewById(R.id.btnTaxHistory);
-        btnHelp = view.findViewById(R.id.btnHelp);
+        TextView btnSettings = view.findViewById(R.id.btnSettings);
+        TextView btnTaxHistory = view.findViewById(R.id.btnTaxHistory);
+        TextView btnHelp = view.findViewById(R.id.btnHelp);
+
+        SwitchCompat switchTheme = view.findViewById(R.id.switchTheme);
 
         SharedPreferences authPrefs = requireActivity().getSharedPreferences("auth", Context.MODE_PRIVATE);
+        SharedPreferences prefs = requireActivity().getSharedPreferences("TaxAppPrefs", Context.MODE_PRIVATE);
 
-        // Fetch the saved strings. If nothing is found, it defaults to "User" and "No Email"
+        boolean isDarkMode = prefs.getBoolean("isDarkMode", false);
+
         String name = authPrefs.getString("userName", "User");
         String email = authPrefs.getString("userEmail", "No Email Provided");
 
@@ -68,10 +68,9 @@ public class ProfileFragment extends Fragment {
                 profileInitials.setText("U");
             }
         } catch (Exception e) {
-            profileInitials.setText("U"); // Fallback for 'User'
+            profileInitials.setText("U");
         }
 
-        // 3. Setup Click Listeners
         btnSettings.setOnClickListener(v ->
                 Toast.makeText(getContext(), "Opening Account Settings...", Toast.LENGTH_SHORT).show()
         );
@@ -84,17 +83,25 @@ public class ProfileFragment extends Fragment {
                 Toast.makeText(getContext(), "Opening Support Center...", Toast.LENGTH_SHORT).show()
         );
 
-        // 4. Logout Logic
+        switchTheme.setChecked(isDarkMode);
+
+        switchTheme.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            prefs.edit().putBoolean("isDarkMode", isChecked).apply();
+
+            if (isChecked) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            }
+        });
+
         logoutButton.setOnClickListener(v -> logoutUser());
     }
 
     private void logoutUser() {
-        // 1. Explicitly log out of Firebase's servers
         try {
             com.google.firebase.auth.FirebaseAuth.getInstance().signOut();
-        } catch (Exception e) {
-            // Failsafe just in case Firebase isn't initialized properly
-        }
+        } catch (Exception e) {}
 
         // 2. Wipe the Authentication Memory
         SharedPreferences authPrefs = requireActivity().getSharedPreferences("auth", Context.MODE_PRIVATE);
