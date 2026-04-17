@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@color/screen_bg"
     android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -17,9 +17,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
-            android:layout_marginTop="44dp"
+            android:layout_marginTop="40dp"
             android:text=""
-            android:textColor="#111827"
+            android:textColor="@color/text_main"
             android:textSize="22sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:text="TOTAL ANNUAL INCOME"
-            android:textColor="#6B7280"
+            android:textColor="@color/text_sub"
             android:textSize="11sp"
             android:textStyle="bold"
             android:letterSpacing="0.1"
@@ -47,8 +47,8 @@
             android:background="@null"
             android:hint="₹0"
             android:inputType="number"
-            android:textColor="#111827"
-            android:textColorHint="#D1D5DB"
+            android:textColor="@color/text_main"
+            android:textColorHint="@color/text_hint"
             android:textSize="48sp"
             android:textStyle="bold"
             android:gravity="center"
@@ -117,9 +117,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="+ Add Assets"
-                android:textColor="#3B82F6"
+                android:textColor="@color/brand_primary"
                 android:textSize="14sp"
-                app:rippleColor="#EFF6FF" />
+                app:rippleColor="@color/brand_primary_alpha" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnClearData"
@@ -128,9 +128,9 @@
                 android:layout_height="wrap_content"
                 android:text="Clear"
                 android:layout_marginLeft="100dp"
-                android:textColor="#EF4444"
+                android:textColor="@color/error_text"
                 android:textSize="14sp"
-                app:rippleColor="#FEF2F2" />
+                app:rippleColor="@color/error_bg" />
         </LinearLayout>
 
         <com.github.mikephil.charting.charts.PieChart
@@ -147,7 +147,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="24dp"
             android:layout_marginTop="24dp"
-            app:cardBackgroundColor="#F0FDF4"
+            app:cardBackgroundColor="@color/success_bg"
             app:cardCornerRadius="12dp"
             app:cardElevation="0dp"
             app:strokeWidth="0dp"
@@ -164,7 +164,7 @@
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:src="@drawable/ic_lightbulb"
-                    app:tint="#16A34A" />
+                    app:tint="@color/success_icon" />
 
                 <TextView
                     android:id="@+id/tvTaxInsight"
@@ -172,7 +172,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
                     android:text="Enter your income to calculate your exact tax liability and discover deductions."
-                    android:textColor="#166534"
+                    android:textColor="@color/success_text"
                     android:textSize="13sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
