@@ -21,4 +21,5 @@ public class TaxItem {
     public double getNumericAmount() { return numericAmount; }
     public boolean isPaid() { return isPaid; }
     public void setPaid(boolean paid) { isPaid = paid; }
+
 }
