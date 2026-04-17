@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="@color/screen_bg">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,9 +21,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="44dp"
+                android:layout_marginTop="40dp"
                 android:text="Document Vault"
-                android:textColor="#111827"
+                android:textColor="@color/text_main"
                 android:textSize="22sp"
                 android:textStyle="bold" />
 
@@ -32,7 +32,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Securely store your identity and tax records."
-                android:textColor="#6B7280"
+                android:textColor="@color/text_sub"
                 android:textSize="14sp" />
         </LinearLayout>
 
@@ -52,8 +52,8 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="24dp"
         android:text="Upload Doc"
-        android:textColor="#FFFFFF"
-        app:backgroundTint="#3B82F6"
-        app:iconTint="#FFFFFF" />
+        android:textColor="@color/button_text"
+        app:backgroundTint="@color/brand_primary"
+        app:iconTint="@color/button_text" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
