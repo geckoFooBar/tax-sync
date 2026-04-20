@@ -1,5 +1,6 @@
 package com.example.myapplication.fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -36,10 +37,8 @@ public class DashboardFragment extends Fragment {
     private EditText editIncome;
     private TextView tvIncomeAmount, tvTaxPayableAmount, tvTaxPaidAmount, tvSavingsAmount, tvTaxInsight;
 
-    private TextView tvGreeting;
     private TextView tvCapGainsAmount, tvCryptoTaxAmount, tvPropertyTaxAmount, tvCessAmount;
     private PieChart taxChart;
-    private MaterialButton btnAddAssets, btnClearData;
 
     private double userCapGainsProfit = 0;
     private double userCryptoProfit = 0;
@@ -48,8 +47,9 @@ public class DashboardFragment extends Fragment {
     // SharedPreferences name
     private static final String PREF_NAME = "TaxAppPrefs";
 
+    //SharedPreferences prefs = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     // Helper Class for Tax Breakdown
-    private class TaxBreakdown {
+    private static class TaxBreakdown {
         double baseIncomeTax, surcharge, capitalGainsTax, cryptoTax, propertyTax, professionalTax, cess, totalDeductions;
 
         double getTotalLiability() {
@@ -65,6 +65,7 @@ public class DashboardFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_dashboard, container, false);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -83,10 +84,10 @@ public class DashboardFragment extends Fragment {
         tvCessAmount = view.findViewById(R.id.tvCessAmount);
 
         taxChart = view.findViewById(R.id.taxChart);
-        btnAddAssets = view.findViewById(R.id.btnAddAssets);
-        btnClearData = view.findViewById(R.id.btnClearData);
+        MaterialButton btnAddAssets = view.findViewById(R.id.btnAddAssets);
+        MaterialButton btnClearData = view.findViewById(R.id.btnClearData);
 
-        tvGreeting = view.findViewById(R.id.tvGreeting);
+        TextView tvGreeting = view.findViewById(R.id.tvGreeting);
 
         SharedPreferences authPrefs = requireActivity().getSharedPreferences("auth", Context.MODE_PRIVATE);
         String fullName = authPrefs.getString("userName", "User");
@@ -94,6 +95,7 @@ public class DashboardFragment extends Fragment {
         if (tvGreeting != null) {
             try {
                 // Grab just the first word (First Name)
+                assert fullName != null;
                 String firstName = fullName.trim().split("\\s+")[0];
                 tvGreeting.setText("Welcome 👋, " + firstName);
             } catch (Exception e) {
@@ -147,6 +149,7 @@ public class DashboardFragment extends Fragment {
         userPropertyTax = prefs.getFloat("propertyTax", 0f);
 
         String savedIncome = prefs.getString("grossIncome", "");
+        assert savedIncome != null;
         if (!savedIncome.isEmpty()) {
             editIncome.setText(savedIncome); // This automatically triggers refreshDashboard()
         }
@@ -203,7 +206,7 @@ public class DashboardFragment extends Fragment {
 
         // Safely update Chart & Insights
         if (tvTaxInsight != null) updateInsight(grossIncome);
-        if (taxChart != null) updateChartData(grossIncome, breakdown, takeHome);
+        if (taxChart != null) updateChartData(grossIncome, breakdown);
     }
 
     private void showAssetBottomSheet() {
@@ -327,7 +330,13 @@ public class DashboardFragment extends Fragment {
     }
 
     private void setupPieChart() {
-        taxChart.setUsePercentValues(true);
+        SharedPreferences modePrefs = requireActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        boolean isDarkMode = modePrefs.getBoolean("isDarkMode", false);
+
+        String color = !isDarkMode ? "#111827" : "#E8EAF0";
+        String legendColor= !isDarkMode ? "#111827" : "#E8EAF0";;
+
+        taxChart.setUsePercentValues(false);
         taxChart.getDescription().setEnabled(false);
         taxChart.setExtraOffsets(20f, 0f, 20f, 0f);
         taxChart.setDrawHoleEnabled(true);
@@ -339,7 +348,7 @@ public class DashboardFragment extends Fragment {
         taxChart.setDrawEntryLabels(false);
         taxChart.setCenterText("Tax\nBreakdown");
         taxChart.setCenterTextSize(14f);
-        taxChart.setCenterTextColor(Color.parseColor("#374151"));
+        taxChart.setCenterTextColor(Color.parseColor(color));
 
         Legend l = taxChart.getLegend();
         l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
@@ -351,12 +360,12 @@ public class DashboardFragment extends Fragment {
         l.setYEntrySpace(6f);
         l.setYOffset(10f);
         l.setTextSize(11f);
-        l.setTextColor(Color.parseColor("#4B5563"));
+        l.setTextColor(Color.parseColor(legendColor));
 
-        updateChartData(0, null, 0);
+        updateChartData(0, null);
     }
 
-    private void updateChartData(double grossIncome, TaxBreakdown breakdown, double takeHome) {
+    private void updateChartData(double grossIncome, TaxBreakdown breakdown) {
         ArrayList<PieEntry> entries = new ArrayList<>();
         ArrayList<Integer> colors = new ArrayList<>();
 
@@ -370,7 +379,7 @@ public class DashboardFragment extends Fragment {
             double totalTax = breakdown.getTotalLiability();
 
             if (totalTax <= 0) {
-                // Zero tax scenario — show a friendly full green ring
+
                 entries.add(new PieEntry(100f, "Zero Tax 🎉"));
                 colors.add(Color.parseColor("#22C55E"));
                 taxChart.setCenterText("₹0\nTax Due");
