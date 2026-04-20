@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#FFFFFF"
+    android:background="@color/card_bg"
     android:orientation="vertical"
     android:padding="24dp">
 
@@ -11,7 +12,7 @@
         android:id="@+id/tvUploadHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Upload Document"
+        android:text="@string/upload_document"
         android:textColor="#111827"
         android:textSize="20sp"
         android:textStyle="bold" />
@@ -21,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:layout_marginBottom="24dp"
-        android:text="Choose a source to upload your file securely."
+        android:text="@string/choose_a_source_to_upload_your_file_securely"
         android:textColor="#6B7280"
         android:textSize="14sp" />
 
@@ -41,11 +42,13 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="16dp">
+            android:padding="16dp"
+            tools:ignore="UseCompoundDrawables">
 
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
+                android:contentDescription="@string/todo"
                 android:src="@android:drawable/ic_menu_camera"
                 app:tint="#3B82F6" />
 
@@ -53,7 +56,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:text="Take a Photo"
+                android:text="@string/take_a_photo"
                 android:textColor="#111827"
                 android:textSize="16sp"
                 android:textStyle="bold" />
