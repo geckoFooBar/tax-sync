@@ -12,7 +12,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-// IMPORTANT: These are the new imports replacing android.widget.CalendarView
 import com.applandeo.materialcalendarview.CalendarView;
 import com.applandeo.materialcalendarview.EventDay;
 
@@ -48,28 +47,25 @@ public class CalendarFragment extends Fragment {
         calendarView = view.findViewById(R.id.calendarView);
         RecyclerView rvCalendarTaxes = view.findViewById(R.id.rvCalendarTaxes);
 
-        // Setup Recycler View
         rvCalendarTaxes.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        allTaxesMasterList = getDummyTaxes();
-
-        // Initialize adapter
-        adapter = new CalendarTaxAdapter(allTaxesMasterList);
+        // Empty adapter immediately so the RecyclerView is ready
+        adapter = new CalendarTaxAdapter(new ArrayList<>());
         rvCalendarTaxes.setAdapter(adapter);
 
-        // --- NEW: Map taxes to the calendar with Red/Green dots ---
-        highlightTaxDates();
+        // Defer heavy work until after the first frame is drawn
+        view.post(() -> {
+            allTaxesMasterList = getDummyTaxes();
+            adapter.updateData(allTaxesMasterList);
+            highlightTaxDates();
+        });
 
-        // --- NEW: Updated Click Listener for the library ---
         calendarView.setOnDayClickListener(eventDay -> {
             Calendar clickedDayCalendar = eventDay.getCalendar();
-
-            // Reconstruct the DD/MM/YYYY format to match your logic
             String selectedDate = String.format(Locale.getDefault(), "%02d/%02d/%04d",
                     clickedDayCalendar.get(Calendar.DAY_OF_MONTH),
                     clickedDayCalendar.get(Calendar.MONTH) + 1,
                     clickedDayCalendar.get(Calendar.YEAR));
-
             filterTaxesByDate(selectedDate);
         });
     }
@@ -129,8 +125,7 @@ public class CalendarFragment extends Fragment {
 
         SharedPreferences prefs = requireActivity().getSharedPreferences("TaxAppPrefs", android.content.Context.MODE_PRIVATE);
         for (TaxItem item : list) {
-            boolean isAlreadyPaid = prefs.getBoolean("status_" + item.getTaxName(), item.isPaid());
-            item.setPaid(isAlreadyPaid);
+            item.setPaid(prefs.getBoolean("status_" + item.getTaxName(), item.isPaid()));
         }
 
         return list;
