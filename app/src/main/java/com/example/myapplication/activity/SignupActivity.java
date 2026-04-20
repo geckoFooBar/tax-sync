@@ -1,5 +1,6 @@
 package com.example.myapplication.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -16,12 +17,13 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.Objects;
+
 public class SignupActivity extends AppCompatActivity {
 
     private TextInputEditText nameEditText, emailEditText, passwordEditText, confirmPasswordEditText;
     private TextInputLayout nameLayout, emailLayout, passwordLayout, confirmPasswordLayout;
     private MaterialButton signupButton;
-    private TextView loginText;
 
     // Declare FirebaseAuth
     private FirebaseAuth mAuth;
@@ -46,7 +48,7 @@ public class SignupActivity extends AppCompatActivity {
         confirmPasswordLayout = findViewById(R.id.confirmPasswordLayout);
 
         signupButton = findViewById(R.id.signupButton);
-        loginText = findViewById(R.id.loginText);
+        TextView loginText = findViewById(R.id.loginText);
 
         signupButton.setOnClickListener(v -> registerUser());
 
@@ -55,11 +57,12 @@ public class SignupActivity extends AppCompatActivity {
         });
     }
 
+    @SuppressLint("SetTextI18n")
     private void registerUser() {
-        String name = nameEditText.getText().toString().trim();
-        String email = emailEditText.getText().toString().trim();
-        String password = passwordEditText.getText().toString().trim();
-        String confirmPassword = confirmPasswordEditText.getText().toString().trim();
+        String name = Objects.requireNonNull(nameEditText.getText()).toString().trim();
+        String email = Objects.requireNonNull(emailEditText.getText()).toString().trim();
+        String password = Objects.requireNonNull(passwordEditText.getText()).toString().trim();
+        String confirmPassword = Objects.requireNonNull(confirmPasswordEditText.getText()).toString().trim();
 
         nameLayout.setError(null);
         emailLayout.setError(null);
@@ -113,7 +116,7 @@ public class SignupActivity extends AppCompatActivity {
                     } else {
                         signupButton.setEnabled(true);
                         signupButton.setText("Create Account");
-                        Toast.makeText(SignupActivity.this, "Error: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(SignupActivity.this, "Error: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
     }
