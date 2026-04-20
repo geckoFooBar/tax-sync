@@ -9,7 +9,8 @@
         <item name="colorSecondaryVariant">@color/info_blue</item>
         <item name="colorOnSecondary">@color/black</item>
 
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowTranslucentStatus">false</item>
 
     </style>
 </resources>
