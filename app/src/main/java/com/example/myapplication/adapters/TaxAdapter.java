@@ -1,5 +1,6 @@
 package com.example.myapplication.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.text.InputFilter;
@@ -19,6 +20,7 @@ import com.example.myapplication.model.TaxItem;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.List;
+import java.util.Objects;
 
 public class TaxAdapter extends RecyclerView.Adapter<TaxAdapter.TaxViewHolder> {
 
@@ -44,6 +46,7 @@ public class TaxAdapter extends RecyclerView.Adapter<TaxAdapter.TaxViewHolder> {
         return new TaxViewHolder(view);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull TaxViewHolder holder, int position) {
         TaxItem item = taxList.get(position);
@@ -76,7 +79,7 @@ public class TaxAdapter extends RecyclerView.Adapter<TaxAdapter.TaxViewHolder> {
         com.google.android.material.bottomsheet.BottomSheetDialog dialog =
                 new com.google.android.material.bottomsheet.BottomSheetDialog(context);
 
-        View sheetView = LayoutInflater.from(context).inflate(R.layout.layout_bottom_sheet_payment, null);
+        @SuppressLint("InflateParams") View sheetView = LayoutInflater.from(context).inflate(R.layout.layout_bottom_sheet_payment, null);
         dialog.setContentView(sheetView);
 
         TextView tvPaymentTaxName = sheetView.findViewById(R.id.tvPaymentTaxName);
@@ -152,7 +155,7 @@ public class TaxAdapter extends RecyclerView.Adapter<TaxAdapter.TaxViewHolder> {
         btnConfirmPayment.setOnClickListener(v -> {
 
             if (containerUPI.getVisibility() == View.VISIBLE) {
-                String upi = etUPI.getText().toString().trim();
+                String upi = Objects.requireNonNull(etUPI.getText()).toString().trim();
                 if (!upi.matches("^[\\w.-]+@[\\w.-]+$")) {
                     etUPI.setError("Enter valid UPI (username@bank)");
                     return;
@@ -160,7 +163,7 @@ public class TaxAdapter extends RecyclerView.Adapter<TaxAdapter.TaxViewHolder> {
             }
 
             if (containerNetBanking.getVisibility() == View.VISIBLE) {
-                String bankName = etNetBanking.getText().toString().trim();
+                String bankName = Objects.requireNonNull(etNetBanking.getText()).toString().trim();
                 if (bankName.isEmpty()) {
                     etNetBanking.setError("Enter bank name");
                     return;
@@ -168,7 +171,7 @@ public class TaxAdapter extends RecyclerView.Adapter<TaxAdapter.TaxViewHolder> {
             }
 
             if (containerCard.getVisibility() == View.VISIBLE) {
-                if (etCardPayment.getText().toString().length() != 16) {
+                if (Objects.requireNonNull(etCardPayment.getText()).toString().length() != 16) {
                     etCardPayment.setError("Card number must be 16 digits");
                     return;
                 }

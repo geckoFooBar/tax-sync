@@ -1,5 +1,6 @@
 package com.example.myapplication.fragments;
 
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -21,7 +22,6 @@ import java.util.List;
 
 public class TaxesFragment extends Fragment {
 
-    private RecyclerView rvTaxes;
     private TaxAdapter taxAdapter;
 
     // We keep all data here, but only pass unpaid items to the adapter
@@ -39,7 +39,7 @@ public class TaxesFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        rvTaxes = view.findViewById(R.id.rvTaxes);
+        RecyclerView rvTaxes = view.findViewById(R.id.rvTaxes);
         rvTaxes.setLayoutManager(new LinearLayoutManager(getContext()));
 
         masterTaxList = getDummyTaxes();
@@ -49,11 +49,12 @@ public class TaxesFragment extends Fragment {
         processTaxesAndDashboard();
 
         // Pass ONLY the unpaid taxes (displayList) to the adapter
-        taxAdapter = new TaxAdapter(displayList, position -> markTaxAsPaid(position));
+        taxAdapter = new TaxAdapter(displayList, this::markTaxAsPaid);
         rvTaxes.setAdapter(taxAdapter);
     }
 
     // --- Core Logic: Separates Paid vs Unpaid & Updates Dashboard ---
+    @SuppressLint("NotifyDataSetChanged")
     public void processTaxesAndDashboard() {
         float totalPaid = 0;
         displayList.clear(); // Clear the screen list before rebuilding
@@ -78,20 +79,15 @@ public class TaxesFragment extends Fragment {
         }
     }
 
-    // --- Action: Your Adapter should call this when "Pay" is clicked ---
     public void markTaxAsPaid(int position) {
-        // Get the specific item the user clicked from the visible list
+
         TaxItem item = displayList.get(position);
 
-        // Mark it as paid in our data
         item.setPaid(true);
 
-        // Save that status permanently in the phone's storage
         SharedPreferences prefs = requireActivity().getSharedPreferences("TaxAppPrefs", android.content.Context.MODE_PRIVATE);
         prefs.edit().putBoolean("status_" + item.getTaxName(), true).apply();
 
-        // Re-run the filter logic: This will recalculate the Dashboard sum
-        // AND automatically remove the item from the TaxesFragment UI!
         processTaxesAndDashboard();
     }
 

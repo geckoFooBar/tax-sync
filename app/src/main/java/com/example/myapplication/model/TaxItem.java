@@ -1,10 +1,10 @@
 package com.example.myapplication.model;
 
 public class TaxItem {
-    private String taxName;
-    private String dueDate;
-    private String displayAmount;
-    private double numericAmount;
+    private final String taxName;
+    private final String dueDate;
+    private final String displayAmount;
+    private final double numericAmount;
     private boolean isPaid;
 
     public TaxItem(String taxName, String dueDate, String displayAmount, double numericAmount, boolean isPaid) {
