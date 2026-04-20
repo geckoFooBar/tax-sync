@@ -1,8 +1,8 @@
 package com.example.myapplication.model;
 
 public class DocumentItem {
-    private String title;
-    private String fileType; // e.g., "PDF", "JPG", "REQ" (Required)
+    private final String title;
+    private final String fileType; // e.g., "PDF", "JPG", "REQ" (Required)
     private int status; // 0 = Missing/Required, 1 = Pending Review, 2 = Verified
 
     public DocumentItem(String title, String fileType, int status) {

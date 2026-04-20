@@ -2,7 +2,7 @@ package com.example.myapplication.fragments;
 
 import com.example.myapplication.BuildConfig;
 
-import android.app.ProgressDialog;
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,7 +26,6 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FirebaseStorage;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -42,23 +41,20 @@ import okhttp3.Response;
 
 public class DocumentsFragment extends Fragment {
 
-    private RecyclerView rvDocuments;
     private DocumentAdapter adapter;
-    private ExtendedFloatingActionButton fabUploadDoc;
 
-    // Firebase Tools
-    private FirebaseStorage storage;
     private FirebaseFirestore firestore;
     private FirebaseAuth auth;
 
-    // To remember what document name they are currently uploading
+    private View uploadProgressOverlay;
     private String currentUploadingDocName = "New Document";
 
     public DocumentsFragment() {}
     private final ActivityResultLauncher<Intent> pickImageLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                if (result.getResultCode() == getActivity().RESULT_OK && result.getData() != null) {
+                requireActivity();
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                     Uri imageUri = result.getData().getData();
                     if (imageUri != null) {
                         uploadToSupabase(imageUri);
@@ -78,12 +74,14 @@ public class DocumentsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        uploadProgressOverlay = view.findViewById(R.id.uploadProgressOverlay);
+
         auth = FirebaseAuth.getInstance();
-        storage = FirebaseStorage.getInstance();
+
         firestore = FirebaseFirestore.getInstance();
 
-        rvDocuments = view.findViewById(R.id.rvDocuments);
-        fabUploadDoc = view.findViewById(R.id.fabUploadDoc);
+        RecyclerView rvDocuments = view.findViewById(R.id.rvDocuments);
+        ExtendedFloatingActionButton fabUploadDoc = view.findViewById(R.id.fabUploadDoc);
 
         rvDocuments.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -96,7 +94,6 @@ public class DocumentsFragment extends Fragment {
         });
         rvDocuments.setAdapter(adapter);
 
-        // NEW: Ask Firebase what the user has ACTUALLY uploaded!
         fetchUserDocuments();
 
         fabUploadDoc.setOnClickListener(v -> {
@@ -161,35 +158,31 @@ public class DocumentsFragment extends Fragment {
         String SUPABASE_ANON_KEY = BuildConfig.SUPABASE_ANON_KEY;
         String BUCKET_NAME = BuildConfig.SUPABASE_BUCKET_NAME;
 
-        ProgressDialog progressDialog = new ProgressDialog(getContext());
-        progressDialog.setTitle("Securing Document");
-        progressDialog.setMessage("Uploading to Cloud Vault...");
-        progressDialog.show();
+        // Show overlay BEFORE starting the thread
+        uploadProgressOverlay.setVisibility(View.VISIBLE);
 
         new Thread(() -> {
             try {
-                // Read the file bytes
-                InputStream inputStream = getContext().getContentResolver().openInputStream(fileUri);
+                InputStream inputStream = requireContext().getContentResolver().openInputStream(fileUri);
                 byte[] fileBytes;
                 java.io.ByteArrayOutputStream buffer = new java.io.ByteArrayOutputStream();
                 int nRead;
                 byte[] data = new byte[16384];
-                while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+                while (true) {
+                    assert inputStream != null;
+                    if ((nRead = inputStream.read(data, 0, data.length)) == -1) break;
                     buffer.write(data, 0, nRead);
                 }
                 fileBytes = buffer.toByteArray();
                 inputStream.close();
 
-                // Determine MIME type
-                String mimeType = getContext().getContentResolver().getType(fileUri);
+                String mimeType = requireContext().getContentResolver().getType(fileUri);
                 if (mimeType == null) mimeType = "application/octet-stream";
 
-                // Build the file path: userId/docName_timestamp.ext
                 String extension = mimeType.contains("pdf") ? ".pdf" : ".jpg";
                 String filePath = userId + "/" + currentUploadingDocName.replace(" ", "_")
                         + "_" + System.currentTimeMillis() + extension;
 
-                // Upload via Supabase Storage REST API
                 OkHttpClient client = new OkHttpClient();
                 RequestBody body = RequestBody.create(fileBytes, MediaType.parse(mimeType));
 
@@ -204,76 +197,38 @@ public class DocumentsFragment extends Fragment {
                 Response response = client.newCall(request).execute();
 
                 if (response.isSuccessful()) {
-                    // Build the public URL
                     String publicUrl = SUPABASE_URL + "/storage/v1/object/public/"
                             + BUCKET_NAME + "/" + filePath;
 
-                    // Save URL to Firestore (this part stays the same!)
-                    getActivity().runOnUiThread(() ->
-                            saveDocumentDataToFirestore(userId, currentUploadingDocName, publicUrl, progressDialog)
-                    );
+                    requireActivity().runOnUiThread(() -> {
+                        uploadProgressOverlay.setVisibility(View.GONE); // ← hide on success
+                        saveDocumentDataToFirestore(userId, currentUploadingDocName, publicUrl);
+                    });
                 } else {
-                    String errorBody = response.body() != null ? response.body().string() : "no body";
-                    String finalError = errorBody;
-                    getActivity().runOnUiThread(() -> {
-                        progressDialog.dismiss();
-                        Toast.makeText(getContext(), "Upload failed: " + finalError, Toast.LENGTH_LONG).show();
+                    String finalError = response.body() != null ? response.body().string() : "no body";
+                    requireActivity().runOnUiThread(() -> {
+                        uploadProgressOverlay.setVisibility(View.GONE); // ← hide on failure
+                        Toast.makeText(requireContext(), "Upload failed: " + finalError, Toast.LENGTH_LONG).show();
                     });
                 }
 
             } catch (Exception e) {
-                getActivity().runOnUiThread(() -> {
-                    progressDialog.dismiss();
-                    Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                requireActivity().runOnUiThread(() -> {
+                    uploadProgressOverlay.setVisibility(View.GONE); // ← hide on error
+                    Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
             }
         }).start();
     }
+
     private List<DocumentItem> getBaseRequiredDocuments() {
         List<DocumentItem> list = new ArrayList<>();
-        list.add(new DocumentItem("PAN Card", "JPG", 0)); // 0 = Missing
+        list.add(new DocumentItem("PAN Card", "JPG", 0));
         list.add(new DocumentItem("Aadhar Card", "PDF", 0));
-        list.add(new DocumentItem("Current Address Proof", "REQ", 0));
+        list.add(new DocumentItem("Current Address Proof", "PDF", 0));
         return list;
     }
 
-    /*
-    private void uploadImageToFirebase(Uri imageUri) {
-        FirebaseUser currentUser = auth.getCurrentUser();
-        if (currentUser == null) return;
-
-        String userId = currentUser.getUid();
-        ProgressDialog progressDialog = new ProgressDialog(getContext());
-        progressDialog.setTitle("Uploading Document");
-        progressDialog.setMessage("Please wait...");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
-
-        String fileName = System.currentTimeMillis() + ".jpg";
-        StorageReference storageRef = storage.getReference()
-                .child("users")
-                .child(userId)
-                .child("documents")
-                .child(fileName);
-
-        storageRef.putFile(imageUri)  // putFile() is simpler & handles URIs directly
-                .continueWithTask(task -> {
-                    if (!task.isSuccessful()) throw task.getException();
-                    return storageRef.getDownloadUrl();
-                })
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        String downloadUrl = task.getResult().toString();
-                        saveDocumentDataToFirestore(userId, currentUploadingDocName, downloadUrl, progressDialog);
-                    } else {
-                        progressDialog.dismiss();
-                        Toast.makeText(getContext(), "Upload failed: " +
-                                task.getException().getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                });
-    }
-
-     */
     private void openFilePicker() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT); // ← action was missing
         intent.setType("*/*");
@@ -282,7 +237,7 @@ public class DocumentsFragment extends Fragment {
         pickImageLauncher.launch(Intent.createChooser(intent, "Select Document")); // ← this line was missing
     }
 
-    private void saveDocumentDataToFirestore(String userId, String docName, String fileUrl, ProgressDialog dialog) {
+    private void saveDocumentDataToFirestore(String userId, String docName, String fileUrl) {
         Map<String, Object> docData = new HashMap<>();
         docData.put("userId", userId);
         docData.put("documentName", docName);
@@ -293,13 +248,13 @@ public class DocumentsFragment extends Fragment {
         firestore.collection("uploaded_documents")
                 .add(docData)
                 .addOnSuccessListener(documentReference -> {
-                    dialog.dismiss();
+                    uploadProgressOverlay.setVisibility(View.GONE);
                     Toast.makeText(getContext(), "Document Secured in Vault!", Toast.LENGTH_SHORT).show();
 
                     fetchUserDocuments();
                 })
                 .addOnFailureListener(e -> {
-                    dialog.dismiss();
+                    uploadProgressOverlay.setVisibility(View.GONE);
                     Toast.makeText(getContext(), "Database Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
