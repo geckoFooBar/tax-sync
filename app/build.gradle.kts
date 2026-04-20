@@ -1,12 +1,13 @@
-import java.util.Properties  // ← add this at the very top of the file
+import java.util.Properties
 
 val localProps = Properties()
 val localPropsFile = rootProject.file("local.properties")
 if (localPropsFile.exists()) {
     localProps.load(localPropsFile.inputStream())
 }
+
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.application) // Correct way to apply it
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.google.firebase.crashlytics)
 }
@@ -47,10 +48,14 @@ android {
         buildConfig = true
     }
     sourceSets {
-        getByName("main") {
-            java {
-                srcDirs("src/main/java")
-            }
+        named("main") {
+            java.srcDirs("src/main/java")
+        }
+    }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
         }
     }
 }
@@ -66,17 +71,27 @@ dependencies {
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.activity)
-    implementation("com.google.android.material:material:1.11.0")
+    implementation(libs.material)
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
-    implementation("com.google.firebase:firebase-storage")
     implementation("com.google.firebase:firebase-firestore")
     implementation(libs.firebase.crashlytics)
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.applandeo:material-calendar-view:1.9.0")
+    implementation("com.squareup.okhttp3:okhttp:5.3.2")
+    implementation("com.applandeo:material-calendar-view:1.9.2")
+    implementation(libs.core)
+    implementation(libs.test.core)
+    implementation(libs.fragment.testing)
+
     testImplementation(libs.junit)
+    testImplementation(libs.mockito.core)
+    testImplementation("org.robolectric:robolectric:4.13")
+    testImplementation("androidx.test:core:1.6.1")
+
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(libs.fragment.testing)
+    androidTestImplementation(libs.test.core)
+    androidTestImplementation("androidx.test:rules:1.5.0")
 }
