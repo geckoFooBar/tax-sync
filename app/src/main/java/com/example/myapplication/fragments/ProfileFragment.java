@@ -57,6 +57,7 @@ public class ProfileFragment extends Fragment {
         profileEmail.setText(email);
 
         try {
+            assert name != null;
             String[] nameParts = name.trim().split("\\s+");
             if (nameParts.length > 1) {
                 String initials = String.valueOf(nameParts[0].charAt(0)) + String.valueOf(nameParts[1].charAt(0));
@@ -93,6 +94,8 @@ public class ProfileFragment extends Fragment {
             } else {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
             }
+
+            requireActivity().recreate();
         });
 
         logoutButton.setOnClickListener(v -> logoutUser());
@@ -101,7 +104,7 @@ public class ProfileFragment extends Fragment {
     private void logoutUser() {
         try {
             com.google.firebase.auth.FirebaseAuth.getInstance().signOut();
-        } catch (Exception e) {}
+        } catch (Exception ignored) {}
 
         // 2. Wipe the Authentication Memory
         SharedPreferences authPrefs = requireActivity().getSharedPreferences("auth", Context.MODE_PRIVATE);
