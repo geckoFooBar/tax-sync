@@ -80,4 +80,18 @@
     <string name="password">Password</string>
     <string name="login">Login</string>
     <string name="taxease">taxEase</string>
+    <string name="upload_document">Upload Document</string>
+    <string name="choose_a_source_to_upload_your_file_securely">Choose a source to upload your file securely.</string>
+    <string name="take_a_photo">Take a Photo</string>
+    <string name="todo">TODO</string>
+    <string name="uploading_to_cloud_vault">Uploading to Cloud Vault...</string>
+    <string name="upload_doc">Upload Doc</string>
+    <string name="get_started">Get Started</string>
+    <string name="create_your_tax_profile">CREATE YOUR TAX PROFILE</string>
+    <string name="full_name">Full Name</string>
+    <string name="email_address">Email Address</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="create_account">CREATE ACCOUNT</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="sign_in">Sign In</string>
 </resources>
