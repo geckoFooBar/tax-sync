@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardBackgroundColor="#FFFFFF"
+    app:cardBackgroundColor="@color/card_bg"
     app:cardCornerRadius="12dp"
     app:cardElevation="0dp"
     app:strokeWidth="1dp"
@@ -21,7 +21,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="CESS &amp; STATE TAX"
-            android:textColor="#9CA3AF"
+            android:textColor="@color/text_main"
             android:textSize="10sp"
             android:textStyle="bold"
             android:letterSpacing="0.05"/>
@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             tools:text="₹0"
-            android:textColor="#111827"
+            android:textColor="@color/text_secondary"
             android:textSize="20sp"
             android:textStyle="bold" />
 
