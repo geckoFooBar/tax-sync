@@ -34,27 +34,38 @@
     <color name="info_blue">#3B82F6</color>
     <color name="info_light">#1A3B82F6</color>
 
-    <color name="screen_bg">#0B0F19</color>
-    <color name="text_main">#FFFFFF</color>
-    <color name="text_secondary">#E5E7EB</color>
-    <color name="text_sub">#9CA3AF</color>
-    <color name="text_hint">#4B5563</color>
-    <color name="input_box_bg">#1A2235</color>
-    <color name="input_text">#F9FAFB</color>
-    <color name="brand_neon">#10B981</color>
-    <color name="icon_circle_bg">#132E26</color>
-    <color name="button_text">#0B0F19</color>
-    <color name="brand_primary">#10B981</color>
-    <color name="brand_primary_alpha">#132E26</color>
-    <color name="card_bg">#1A2235</color>
-    <color name="card_stroke">#374151</color>
-    <color name="divider_bg">#374151</color>
-    <color name="icon_tint">#6B7280</color>
-    <color name="error_text">#F87171</color>
-    <color name="error_bg">#3F1D1D</color>
-    <color name="error_stroke">#7F1D1D</color>
-    <color name="success_bg">#064E3B</color>
-    <color name="success_icon">#34D399</color>
-    <color name="success_text">#A7F3D0</color>
+    <!-- Backgrounds & Surfaces -->
+    <color name="screen_bg">#1C1F26</color>
+    <color name="card_bg">#252930</color>
+    <color name="input_box_bg">#2E3340</color>
+
+    <!-- Text -->
+    <color name="text_main">#E8EAF0</color>
+    <color name="text_secondary">#B0B7C3</color>
+    <color name="text_sub">#7A8394</color>
+    <color name="text_hint">#4A5468</color>
+    <color name="input_text">#E8EAF0</color>
+
+    <!-- Brand & Interactive -->
+    <color name="brand_primary">#3B82F6</color>
+    <color name="brand_neon">#34C98C</color>
+    <color name="brand_primary_alpha">#1A3D2E</color>
+    <color name="icon_circle_bg">#1A3D2E</color>
+    <color name="button_text">#1C1F26</color>
+
+    <!-- Borders & Icons -->
+    <color name="card_stroke">#363C4A</color>
+    <color name="divider_bg">#363C4A</color>
+    <color name="icon_tint">#4A5268</color>
+
+    <!-- Semantic: Error -->
+    <color name="error_text">#F28B82</color>
+    <color name="error_bg">#2E1C1C</color>
+    <color name="error_stroke">#5C2828</color>
+
+    <!-- Semantic: Success -->
+    <color name="success_bg">#1A3D2E</color>
+    <color name="success_icon">#34C98C</color>
+    <color name="success_text">#8DDBB8</color>
 
 </resources>
