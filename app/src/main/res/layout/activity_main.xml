@@ -5,7 +5,7 @@
     android:layout_height="match_parent">
 
     <FrameLayout
-        android:id="@+id/main_container"
+        android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"/>
@@ -17,5 +17,6 @@
         android:background="@color/bg_light"
         app:itemIconTint="@color/primary"
         app:itemTextColor="@color/primary"
-        app:menu="@menu/bottom_navigation"/>
+        app:menu="@menu/bottom_navigation"
+        app:layout_insetEdge="bottom"/>
 </LinearLayout>
