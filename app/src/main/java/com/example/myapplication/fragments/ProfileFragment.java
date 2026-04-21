@@ -33,7 +33,6 @@ public class ProfileFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 1. Bind UI Elements
         TextView profileName = view.findViewById(R.id.profileName);
         TextView profileEmail = view.findViewById(R.id.profileEmail);
         TextView profileInitials = view.findViewById(R.id.profileInitials);
@@ -63,7 +62,6 @@ public class ProfileFragment extends Fragment {
                 String initials = String.valueOf(nameParts[0].charAt(0)) + String.valueOf(nameParts[1].charAt(0));
                 profileInitials.setText(initials.toUpperCase());
             } else if (nameParts.length == 1 && !nameParts[0].isEmpty()) {
-                // If they only entered a first name
                 profileInitials.setText(String.valueOf(nameParts[0].charAt(0)).toUpperCase());
             } else {
                 profileInitials.setText("U");
@@ -102,22 +100,15 @@ public class ProfileFragment extends Fragment {
     }
 
     private void logoutUser() {
-        try {
-            com.google.firebase.auth.FirebaseAuth.getInstance().signOut();
-        } catch (Exception ignored) {}
-
-        // 2. Wipe the Authentication Memory
         SharedPreferences authPrefs = requireActivity().getSharedPreferences("auth", Context.MODE_PRIVATE);
         SharedPreferences.Editor authEditor = authPrefs.edit();
-        authEditor.clear(); // Wipes everything
-        authEditor.putBoolean("isLoggedIn", false); // Forces the flag to false just to be bulletproof
+        authEditor.clear();
+        authEditor.putBoolean("isLoggedIn", false);
         authEditor.apply();
 
-        // 3. Wipe the Financial Data Memory (So a new user doesn't see the old user's taxes)
         SharedPreferences taxPrefs = requireActivity().getSharedPreferences("TaxAppPrefs", Context.MODE_PRIVATE);
         taxPrefs.edit().clear().apply();
 
-        // 4. Send them back to Login and completely destroy the Dashboard from the phone's back-stack
         Intent intent = new Intent(getActivity(), LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
