@@ -39,14 +39,17 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     buildFeatures {
         viewBinding = true
         buildConfig = true
     }
+
     sourceSets {
         named("main") {
             java.srcDirs("src/main/java")
@@ -74,10 +77,6 @@ dependencies {
     implementation(libs.material)
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth)
-    implementation("com.google.firebase:firebase-firestore")
-    implementation(libs.firebase.crashlytics)
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
     implementation("com.applandeo:material-calendar-view:1.9.2")
     implementation(libs.core)
