@@ -9,16 +9,24 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myapplication.R;
+import com.example.myapplication.services.SupabaseAuthService;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.Objects;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -27,23 +35,25 @@ public class LoginActivity extends AppCompatActivity {
     private CheckBox rememberMe;
     private MaterialButton loginButton;
 
-    private FirebaseAuth mAuth;
+    private SupabaseAuthService authService;
+    private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Initialize Firebase Auth
-        mAuth = FirebaseAuth.getInstance();
+        prefs = getSharedPreferences("auth", MODE_PRIVATE);
 
-        // Check if user is already logged in natively via Firebase
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
+        // Check if user is already logged in locally
+        if (prefs.getBoolean("isLoggedIn", false)) {
             startActivity(new Intent(this, MainActivity.class));
             finish();
             return;
         }
+
+        // Initialize our custom unified auth service
+        authService = new SupabaseAuthService();
 
         // Bind UI Elements
         emailEditText = findViewById(R.id.emailEditText);
@@ -77,47 +87,79 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setEnabled(false);
         loginButton.setText("Signing In...");
 
-        // Authenticate with Firebase
-        // Authenticate with Firebase
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
+        // Authenticate with Supabase
+        authService.login(email, password, new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                runOnUiThread(() -> {
+                    loginButton.setEnabled(true);
+                    loginButton.setText("Sign In");
+                    Toast.makeText(LoginActivity.this, "Network Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+            }
 
-                        FirebaseUser user = mAuth.getCurrentUser();
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                final String responseData = response.body().string();
 
-                        SharedPreferences prefs = getSharedPreferences("auth", MODE_PRIVATE);
-                        SharedPreferences.Editor editor = prefs.edit();
+                runOnUiThread(() -> {
+                    if (response.isSuccessful()) {
+                        try {
+                            // Extract Supabase Session Data
+                            JSONObject json = new JSONObject(responseData);
+                            String accessToken = json.optString("access_token", "");
+                            String refreshToken = json.optString("refresh_token", "");
 
-                        if (rememberMe.isChecked()) {
-                            editor.putBoolean("isLoggedIn", true);
-                        }
+                            // Extract user info from nested JSON object
+                            JSONObject userObj = json.optJSONObject("user");
+                            String fetchedName = "Taxpayer"; // Fallback
+                            String fetchedEmail = email;
 
-                        // NEW: Restore the Name and Email from Firebase to local memory!
-                        if (user != null) {
-                            String fetchedName = user.getDisplayName();
-                            String fetchedEmail = user.getEmail();
-
-                            // Fallback just in case they signed up before we added the name feature
-                            if (fetchedName == null || fetchedName.isEmpty()) {
-                                fetchedName = "Taxpayer";
+                            if (userObj != null) {
+                                fetchedEmail = userObj.optString("email", email);
+                                JSONObject metadata = userObj.optJSONObject("user_metadata");
+                                if (metadata != null) {
+                                    fetchedName = metadata.optString("full_name", "Taxpayer");
+                                }
                             }
 
+                            SharedPreferences.Editor editor = prefs.edit();
+
+                            if (rememberMe.isChecked()) {
+                                editor.putBoolean("isLoggedIn", true);
+                            }
+
+                            // Save tokens and user data for the session
                             editor.putString("userName", fetchedName);
                             editor.putString("userEmail", fetchedEmail);
+                            editor.putString("accessToken", accessToken);
+                            editor.putString("refreshToken", refreshToken);
+                            editor.apply();
+
+                            Toast.makeText(LoginActivity.this, "Welcome Back!", Toast.LENGTH_SHORT).show();
+
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
+
+                        } catch (JSONException e) {
+                            loginButton.setEnabled(true);
+                            loginButton.setText("Sign In");
+                            Toast.makeText(LoginActivity.this, "Data parsing error.", Toast.LENGTH_SHORT).show();
                         }
-
-                        editor.apply();
-
-                        Toast.makeText(LoginActivity.this, "Welcome Back!", Toast.LENGTH_SHORT).show();
-
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
                     } else {
                         loginButton.setEnabled(true);
                         loginButton.setText("Sign In");
-                        Toast.makeText(LoginActivity.this, "Authentication failed: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_LONG).show();
+                        try {
+                            JSONObject errorJson = new JSONObject(responseData);
+                            String errorMsg = errorJson.optString("error_description", "Invalid login credentials");
+                            Toast.makeText(LoginActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                        } catch (JSONException e) {
+                            Toast.makeText(LoginActivity.this, "Authentication failed: " + response.code(), Toast.LENGTH_LONG).show();
+                        }
                     }
                 });
+            }
+        });
     }
 }

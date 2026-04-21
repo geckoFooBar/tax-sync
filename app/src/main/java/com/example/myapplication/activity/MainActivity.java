@@ -15,7 +15,6 @@ import com.example.myapplication.fragments.ProfileFragment;
 import com.example.myapplication.fragments.CalendarFragment;
 import com.example.myapplication.fragments.TaxesFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.FirebaseApp;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -57,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
 
             return loadFragment(fragment);
         });
-        FirebaseApp.initializeApp(this);
     }
 
     private boolean loadFragment(Fragment fragment) {

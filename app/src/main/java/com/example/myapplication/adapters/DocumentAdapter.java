@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,12 +20,12 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
     private List<DocumentItem> docList;
     private OnDocumentClickListener listener;
 
-    // 1. Create an interface for clicks
+    // 1. Updated Interface
     public interface OnDocumentClickListener {
         void onUploadClicked(DocumentItem item);
+        void onViewClicked(DocumentItem item); // NEW: Triggered to view the file
     }
 
-    // 2. Update the constructor to require the listener
     public DocumentAdapter(List<DocumentItem> docList, OnDocumentClickListener listener) {
         this.docList = docList;
         this.listener = listener;
@@ -68,11 +67,12 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
             holder.tvDocAction.setTextColor(Color.parseColor("#3B82F6"));
         }
 
+        // 2. Route the click to the correct listener method
         holder.itemView.setOnClickListener(v -> {
             if (item.getStatus() == 0) {
                 listener.onUploadClicked(item);
             } else {
-                Toast.makeText(v.getContext(), "Opening " + item.getTitle(), Toast.LENGTH_SHORT).show();
+                listener.onViewClicked(item);
             }
         });
     }

@@ -1,9 +1,9 @@
 package com.example.myapplication.fragments;
 
-import com.example.myapplication.BuildConfig;
-
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -19,20 +19,24 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.myapplication.BuildConfig;
 import com.example.myapplication.R;
 import com.example.myapplication.adapters.DocumentAdapter;
 import com.example.myapplication.model.DocumentItem;
+import com.example.myapplication.network.ApiClient;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -42,28 +46,24 @@ import okhttp3.Response;
 public class DocumentsFragment extends Fragment {
 
     private DocumentAdapter adapter;
-
-    private FirebaseFirestore firestore;
-    private FirebaseAuth auth;
-
     private View uploadProgressOverlay;
     private String currentUploadingDocName = "New Document";
 
+    private SharedPreferences authPrefs;
+
     public DocumentsFragment() {}
+
     private final ActivityResultLauncher<Intent> pickImageLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                requireActivity();
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                     Uri imageUri = result.getData().getData();
                     if (imageUri != null) {
-                        uploadToSupabase(imageUri);
+                        uploadToSupabaseStorage(imageUri);
                     }
                 }
             }
     );
-
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -75,10 +75,7 @@ public class DocumentsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         uploadProgressOverlay = view.findViewById(R.id.uploadProgressOverlay);
-
-        auth = FirebaseAuth.getInstance();
-
-        firestore = FirebaseFirestore.getInstance();
+        authPrefs = requireActivity().getSharedPreferences("auth", Context.MODE_PRIVATE);
 
         RecyclerView rvDocuments = view.findViewById(R.id.rvDocuments);
         ExtendedFloatingActionButton fabUploadDoc = view.findViewById(R.id.fabUploadDoc);
@@ -88,12 +85,26 @@ public class DocumentsFragment extends Fragment {
         // Load the base required documents first (shows as 'Missing' by default)
         List<DocumentItem> myDocs = getBaseRequiredDocuments();
 
-        adapter = new DocumentAdapter(myDocs, item -> {
-            currentUploadingDocName = item.getTitle();
-            openFilePicker();
+        adapter = new DocumentAdapter(myDocs, new DocumentAdapter.OnDocumentClickListener() {
+            @Override
+            public void onUploadClicked(DocumentItem item) {
+                currentUploadingDocName = item.getTitle();
+                openFilePicker();
+            }
+
+            @Override
+            public void onViewClicked(DocumentItem item) {
+                if (item.getFileUrl() != null && !item.getFileUrl().isEmpty()) {
+                    // We now pass the whole item instead of just the URL
+                    openDocumentPreview(item);
+                } else {
+                    Toast.makeText(getContext(), "Document link is broken or syncing.", Toast.LENGTH_SHORT).show();
+                }
+            }
         });
         rvDocuments.setAdapter(adapter);
 
+        // Fetch cloud data using REST
         fetchUserDocuments();
 
         fabUploadDoc.setOnClickListener(v -> {
@@ -103,62 +114,131 @@ public class DocumentsFragment extends Fragment {
     }
 
     private void fetchUserDocuments() {
-        FirebaseUser currentUser = auth.getCurrentUser();
-        if (currentUser == null) return;
+        String url = BuildConfig.SUPABASE_URL + "/rest/v1/uploaded_documents?select=*";
 
-        String userId = currentUser.getUid();
-
-        firestore.collection("uploaded_documents")
-                .whereEqualTo("userId", userId)
+        Request request = new Request.Builder()
+                .url(url)
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    // 1. Get a fresh copy of the required baseline
-                    List<DocumentItem> displayList = getBaseRequiredDocuments();
+                .build();
 
-                    // 2. Loop through the documents fetched from the cloud
-                    for (com.google.firebase.firestore.QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        String docName = doc.getString("documentName");
-                        Long statusLong = doc.getLong("status");
-                        int status = (statusLong != null) ? statusLong.intValue() : 1; // Default to 'In Review'
+        ApiClient.getInstance(requireContext()).newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                requireActivity().runOnUiThread(() ->
+                        Toast.makeText(getContext(), "Failed to sync cloud documents", Toast.LENGTH_SHORT).show()
+                );
+            }
 
-                        boolean foundMatch = false;
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful() && response.body() != null) {
+                    String responseData = response.body().string();
 
-                        // 3. If the cloud document matches a required document, update its status!
-                        for (DocumentItem item : displayList) {
-                            if (item.getTitle().equals(docName)) {
-                                item.setStatus(status); // Changes it from Red (0) to Amber (1) or Green (2)
-                                foundMatch = true;
-                                break;
+                    requireActivity().runOnUiThread(() -> {
+                        try {
+                            JSONArray jsonArray = new JSONArray(responseData);
+                            List<DocumentItem> displayList = getBaseRequiredDocuments();
+
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                JSONObject doc = jsonArray.getJSONObject(i);
+                                String docName = doc.optString("document_name");
+                                int status = doc.optInt("status", 1);
+                                String fileUrl = doc.optString("file_url", ""); // NEW: Grab the URL
+
+                                boolean foundMatch = false;
+
+                                for (DocumentItem item : displayList) {
+                                    if (item.getTitle().equals(docName)) {
+                                        item.setStatus(status);
+                                        item.setFileUrl(fileUrl); // NEW: Attach URL to existing required doc
+                                        foundMatch = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!foundMatch) {
+                                    // NEW: Pass URL to custom uploaded docs
+                                    displayList.add(new DocumentItem(docName, "FILE", status, fileUrl));
+                                }
                             }
+                            adapter.updateData(displayList);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
-
-                        // 4. If they uploaded a custom file (like "General Tax Receipt"), add it as a new row
-                        if (!foundMatch) {
-                            displayList.add(new DocumentItem(docName, "IMG", status));
-                        }
-                    }
-
-                    // 5. Push the merged list to the screen
-                    adapter.updateData(displayList);
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Failed to sync cloud documents", Toast.LENGTH_SHORT).show();
-                });
+                    });
+                }
+            }
+        });
     }
 
-    private void uploadToSupabase(Uri fileUri) {
+    @android.annotation.SuppressLint("SetJavaScriptEnabled")
+    private void openDocumentPreview(DocumentItem item) {
+        // 1. Initialize a standard dialog (removes the full-screen theme)
+        android.app.Dialog dialog = new android.app.Dialog(requireContext());
+        dialog.setContentView(R.layout.dialog_preview);
 
-        if (auth.getCurrentUser() == null) {
-            Toast.makeText(getContext(), "Please log in first", Toast.LENGTH_SHORT).show();
+        // 2. Make it float nicely by setting specific dimensions and a transparent background
+        android.view.Window window = dialog.getWindow();
+        if (window != null) {
+            // Set dimensions to 90% width and 75% height of the screen
+            int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.90);
+            int height = (int) (getResources().getDisplayMetrics().heightPixels * 0.75);
+            window.setLayout(width, height);
+
+            // Make the actual window square transparent so our rounded CardView corners show
+            window.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+            // Ensure the background dims slightly to focus the user's attention
+            window.setDimAmount(0.6f);
+        }
+
+        android.widget.ImageButton btnClose = dialog.findViewById(R.id.btnClosePreview);
+        android.webkit.WebView webView = dialog.findViewById(R.id.webViewPreview);
+
+        btnClose.setOnClickListener(v -> dialog.dismiss());
+
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setSupportZoom(true);
+        webView.getSettings().setBuiltInZoomControls(true);
+        webView.getSettings().setDisplayZoomControls(false);
+        webView.setWebViewClient(new android.webkit.WebViewClient());
+
+        String targetUrl = item.getFileUrl();
+
+        if (item.getFileType() != null && item.getFileType().equalsIgnoreCase("PDF")) {
+            try {
+                String pdfUrl = "https://docs.google.com/gview?embedded=true&url=" +
+                        java.net.URLEncoder.encode(targetUrl, "UTF-8");
+                webView.loadUrl(pdfUrl);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            String htmlData = "<html>" +
+                    "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes\"></head>" +
+                    "<body style=\"margin: 0; padding: 0; background-color: #F3F4F6; display: flex; justify-content: center; align-items: center; height: 100vh;\">" +
+                    "<img src=\"" + targetUrl + "\" style=\"max-width: 100%; max-height: 100%; object-fit: contain;\" />" +
+                    "</body></html>";
+
+            webView.loadDataWithBaseURL(null, htmlData, "text/html", "UTF-8", null);
+        }
+
+        dialog.show();
+    }
+
+    private void uploadToSupabaseStorage(Uri fileUri) {
+        String accessToken = authPrefs.getString("accessToken", null);
+        String userEmail = authPrefs.getString("userEmail", "unknown_user");
+
+        if (accessToken == null) {
+            Toast.makeText(getContext(), "Authentication error. Please log in again.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String userId = auth.getCurrentUser().getUid();
         String SUPABASE_URL = BuildConfig.SUPABASE_URL;
         String SUPABASE_ANON_KEY = BuildConfig.SUPABASE_ANON_KEY;
         String BUCKET_NAME = BuildConfig.SUPABASE_BUCKET_NAME;
 
-        // Show overlay BEFORE starting the thread
         uploadProgressOverlay.setVisibility(View.VISIBLE);
 
         new Thread(() -> {
@@ -180,16 +260,19 @@ public class DocumentsFragment extends Fragment {
                 if (mimeType == null) mimeType = "application/octet-stream";
 
                 String extension = mimeType.contains("pdf") ? ".pdf" : ".jpg";
-                String filePath = userId + "/" + currentUploadingDocName.replace(" ", "_")
+                // Using email as the storage folder to uniquely identify user files
+                String filePath = userEmail + "/" + currentUploadingDocName.replace(" ", "_")
                         + "_" + System.currentTimeMillis() + extension;
 
+                // We create a fresh client here because our ApiClient interceptor forces "application/json" Content-Type
                 OkHttpClient client = new OkHttpClient();
                 RequestBody body = RequestBody.create(fileBytes, MediaType.parse(mimeType));
 
                 Request request = new Request.Builder()
                         .url(SUPABASE_URL + "/storage/v1/object/" + BUCKET_NAME + "/" + filePath)
                         .post(body)
-                        .addHeader("Authorization", "Bearer " + SUPABASE_ANON_KEY)
+
+                        .addHeader("Authorization", "Bearer " + accessToken)
                         .addHeader("apikey", SUPABASE_ANON_KEY)
                         .addHeader("Content-Type", mimeType)
                         .build();
@@ -200,25 +283,69 @@ public class DocumentsFragment extends Fragment {
                     String publicUrl = SUPABASE_URL + "/storage/v1/object/public/"
                             + BUCKET_NAME + "/" + filePath;
 
-                    requireActivity().runOnUiThread(() -> {
-                        uploadProgressOverlay.setVisibility(View.GONE); // ← hide on success
-                        saveDocumentDataToFirestore(userId, currentUploadingDocName, publicUrl);
-                    });
+                    requireActivity().runOnUiThread(() -> saveDocumentDataToDatabase(currentUploadingDocName, publicUrl));
                 } else {
-                    String finalError = response.body() != null ? response.body().string() : "no body";
+                    String finalError = response.body().string();
                     requireActivity().runOnUiThread(() -> {
-                        uploadProgressOverlay.setVisibility(View.GONE); // ← hide on failure
+                        uploadProgressOverlay.setVisibility(View.GONE);
                         Toast.makeText(requireContext(), "Upload failed: " + finalError, Toast.LENGTH_LONG).show();
                     });
                 }
 
             } catch (Exception e) {
                 requireActivity().runOnUiThread(() -> {
-                    uploadProgressOverlay.setVisibility(View.GONE); // ← hide on error
+                    uploadProgressOverlay.setVisibility(View.GONE);
                     Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
             }
         }).start();
+    }
+
+    private void saveDocumentDataToDatabase(String docName, String fileUrl) {
+        String url = BuildConfig.SUPABASE_URL + "/rest/v1/uploaded_documents";
+
+        JSONObject jsonBody = new JSONObject();
+        try {
+            jsonBody.put("document_name", docName);
+            jsonBody.put("file_url", fileUrl);
+            jsonBody.put("status", 1); // 1 = In Review
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        RequestBody body = RequestBody.create(jsonBody.toString(), MediaType.parse("application/json"));
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+
+        ApiClient.getInstance(requireContext()).newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                requireActivity().runOnUiThread(() -> {
+                    uploadProgressOverlay.setVisibility(View.GONE);
+                    Toast.makeText(getContext(), "Database Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                final String responseData = response.body() != null ? response.body().string() : "No error body";
+
+                requireActivity().runOnUiThread(() -> {
+                    uploadProgressOverlay.setVisibility(View.GONE);
+                    if (response.isSuccessful()) {
+                        Toast.makeText(getContext(), "Document Secured in Vault!", Toast.LENGTH_SHORT).show();
+                        // This safely refreshes the list once, because fetchUserDocuments() no longer loops back here
+                        fetchUserDocuments();
+                    } else {
+                        Toast.makeText(getContext(), "DB Error: " + responseData, Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        });
     }
 
     private List<DocumentItem> getBaseRequiredDocuments() {
@@ -230,33 +357,10 @@ public class DocumentsFragment extends Fragment {
     }
 
     private void openFilePicker() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT); // ← action was missing
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
         String[] mimeTypes = {"image/*", "application/pdf"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
-        pickImageLauncher.launch(Intent.createChooser(intent, "Select Document")); // ← this line was missing
+        pickImageLauncher.launch(Intent.createChooser(intent, "Select Document"));
     }
-
-    private void saveDocumentDataToFirestore(String userId, String docName, String fileUrl) {
-        Map<String, Object> docData = new HashMap<>();
-        docData.put("userId", userId);
-        docData.put("documentName", docName);
-        docData.put("fileUrl", fileUrl);
-        docData.put("uploadTimestamp", System.currentTimeMillis());
-        docData.put("status", 1); // 1 = In Review
-
-        firestore.collection("uploaded_documents")
-                .add(docData)
-                .addOnSuccessListener(documentReference -> {
-                    uploadProgressOverlay.setVisibility(View.GONE);
-                    Toast.makeText(getContext(), "Document Secured in Vault!", Toast.LENGTH_SHORT).show();
-
-                    fetchUserDocuments();
-                })
-                .addOnFailureListener(e -> {
-                    uploadProgressOverlay.setVisibility(View.GONE);
-                    Toast.makeText(getContext(), "Database Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
-    }
-
 }
