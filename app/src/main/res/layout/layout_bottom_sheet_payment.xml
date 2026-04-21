@@ -1,218 +1,134 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/card_bg"
-    android:orientation="vertical"
-    android:padding="24dp">
+    android:fillViewport="true">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Complete Payment"
-        android:textColor="@color/text_main"
-        android:textSize="20sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Select a method to clear your dues securely."
-        android:textColor="@color/text_secondary"
-        android:textSize="14sp"
-        android:layout_marginBottom="20dp"/>
-
-    <com.google.android.material.card.MaterialCardView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="#F9FAFB"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="0dp"
-        app:strokeWidth="1dp"
-        app:strokeColor="#E5E7EB"
-        android:layout_marginBottom="24dp">
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Complete Payment"
+            android:textColor="@color/text_main"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Select a method to clear your dues securely."
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            android:layout_marginBottom="20dp"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="#F9FAFB"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#E5E7EB"
+            android:layout_marginBottom="24dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tvPaymentTaxName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Advance Tax (Q1)"
+                    android:textColor="#374151"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvPaymentAmount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="₹45,000"
+                    android:textColor="@color/text_main"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PAYMENT METHOD"
+            android:textColor="#9CA3AF"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.05"
+            android:layout_marginBottom="8dp"/>
+
+        <RadioGroup
+            android:id="@+id/rgPaymentMethods"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checkedButton="@+id/rbUPI">
+
+            <RadioButton
+                android:id="@+id/rbUPI"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=" UPI (GPay, PhonePe, Paytm)"
+                android:textColor="@color/text_secondary"
+                android:textSize="15sp"
+                android:paddingVertical="8dp"
+                android:buttonTint="#3B82F6"/>
+
+            <RadioButton
+                android:id="@+id/rbNetBanking"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=" Net Banking"
+                android:textColor="@color/text_secondary"
+                android:textSize="15sp"
+                android:paddingVertical="8dp"
+                android:buttonTint="#3B82F6"/>
+
+            <RadioButton
+                android:id="@+id/rbCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=" Debit / Credit Card"
+                android:textColor="@color/text_secondary"
+                android:textSize="15sp"
+                android:paddingVertical="8dp"
+                android:buttonTint="#3B82F6"/>
+        </RadioGroup>
 
         <LinearLayout
+            android:id="@+id/containerUPI"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:id="@+id/tvPaymentTaxName"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Advance Tax (Q1)"
-                android:textColor="#374151"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvPaymentAmount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="₹45,000"
-                android:textColor="#111827"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="PAYMENT METHOD"
-        android:textColor="#9CA3AF"
-        android:textSize="11sp"
-        android:textStyle="bold"
-        android:letterSpacing="0.05"
-        android:layout_marginBottom="8dp"/>
-
-    <RadioGroup
-        android:id="@+id/rgPaymentMethods"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:checkedButton="@+id/rbUPI">
-
-        <RadioButton
-            android:id="@+id/rbUPI"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text=" UPI (GPay, PhonePe, Paytm)"
-            android:textColor="@color/text_secondary"
-            android:textSize="15sp"
-            android:paddingVertical="8dp"
-            android:buttonTint="#3B82F6"/>
-
-        <RadioButton
-            android:id="@+id/rbNetBanking"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text=" Net Banking"
-            android:textColor="@color/text_secondary"
-            android:textSize="15sp"
-            android:paddingVertical="8dp"
-            android:buttonTint="#3B82F6"/>
-
-        <RadioButton
-            android:id="@+id/rbCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text=" Debit / Credit Card"
-            android:textColor="@color/text_secondary"
-            android:textSize="15sp"
-            android:paddingVertical="8dp"
-            android:buttonTint="#3B82F6"/>
-    </RadioGroup>
-
-    <LinearLayout
-        android:id="@+id/containerUPI"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="12dp"
-        android:visibility="visible">
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter UPI ID (e.g., name@bank)"
-            android:textColorHint="#6B7280"
-            app:boxStrokeColor="#111827"
-            app:boxBackgroundColor="@color/input_box_bg"
-            app:boxCornerRadiusTopStart="8dp"
-            app:boxCornerRadiusTopEnd="8dp"
-            app:boxCornerRadiusBottomStart="8dp"
-            app:boxCornerRadiusBottomEnd="8dp">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etUPI"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textEmailAddress"
-                android:textColor="#111827"/>
-        </com.google.android.material.textfield.TextInputLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/containerNetBanking"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="12dp"
-        android:visibility="gone">
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Search Bank Name"
-            android:textColorHint="#6B7280"
-            app:boxStrokeColor="#111827"
-            app:boxBackgroundColor="@color/input_box_bg"
-            app:boxCornerRadiusTopStart="8dp"
-            app:boxCornerRadiusTopEnd="8dp"
-            app:boxCornerRadiusBottomStart="8dp"
-            app:boxCornerRadiusBottomEnd="8dp">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etNetBanking"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text"
-                android:textColor="#111827"/>
-        </com.google.android.material.textfield.TextInputLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/containerCard"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="12dp"
-        android:visibility="gone">
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Card Number"
-            android:textColorHint="#6B7280"
-            app:boxStrokeColor="#111827"
-            app:boxBackgroundColor="@color/input_box_bg"
-            app:boxCornerRadiusTopStart="8dp"
-            app:boxCornerRadiusTopEnd="8dp"
-            app:boxCornerRadiusBottomStart="8dp"
-            app:boxCornerRadiusBottomEnd="8dp">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etCardPayment"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:textColor="#111827"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="8dp">
+            android:orientation="vertical"
+            android:layout_marginTop="12dp"
+            android:visibility="visible">
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                android:hint="MM/YY"
+                android:hint="Enter UPI ID (e.g., name@bank)"
                 android:textColorHint="#6B7280"
-                app:boxStrokeColor="#111827"
+                app:boxStrokeColor="@color/text_main"
                 app:boxBackgroundColor="@color/input_box_bg"
                 app:boxCornerRadiusTopStart="8dp"
                 app:boxCornerRadiusTopEnd="8dp"
@@ -220,22 +136,112 @@
                 app:boxCornerRadiusBottomEnd="8dp">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etExpiry"
+                    android:id="@+id/etUPI"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress"
+                    android:textColor="@color/text_main"/>
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/containerNetBanking"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="12dp"
+            android:visibility="gone">
+
+            <!-- Bank Search + Dropdown -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilBankSearch"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Search &amp; Select Bank"
+                android:textColorHint="#6B7280"
+                app:boxStrokeColor="@color/text_main"
+                app:boxBackgroundColor="@color/input_box_bg"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp"
+                app:startIconDrawable="@android:drawable/ic_menu_search"
+                app:startIconTint="#6B7280">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etNetBanking"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:textColor="@color/text_main"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Filtered bank list (shown while typing) -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvBankList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxHeight="180dp"
+                android:background="#FFFFFF"
+                android:elevation="4dp"
+                android:visibility="gone"
+                android:layout_marginTop="2dp"
+                android:nestedScrollingEnabled="false"/>
+
+            <!-- Selected bank chip -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipSelectedBank"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="No bank selected"
+                android:textColor="#374151"
+                android:visibility="gone"
+                app:chipBackgroundColor="#EFF6FF"
+                app:chipStrokeColor="#3B82F6"
+                app:chipStrokeWidth="1dp"
+                app:chipIconTint="#3B82F6"
+                app:closeIconVisible="true"
+                app:closeIconTint="#6B7280"/>
+
+            <!-- Account Number -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilAccountNumber"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="Account Number"
+                android:textColorHint="#6B7280"
+                app:boxStrokeColor="@color/text_main"
+                app:boxBackgroundColor="@color/input_box_bg"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp"
+                app:counterEnabled="true"
+                app:counterMaxLength="18">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etAccountNumber"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="number"
-                    android:maxLength="5"
-                    android:textColor="#111827"/>
+                    android:maxLength="18"
+                    android:textColor="@color/text_main"/>
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Confirm Account Number -->
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilConfirmAccount"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="CVV"
+                android:layout_marginTop="8dp"
+                android:hint="Confirm Account Number"
                 android:textColorHint="#6B7280"
-                app:boxStrokeColor="#111827"
+                app:boxStrokeColor="@color/text_main"
                 app:boxBackgroundColor="@color/input_box_bg"
                 app:boxCornerRadiusTopStart="8dp"
                 app:boxCornerRadiusTopEnd="8dp"
@@ -243,25 +249,188 @@
                 app:boxCornerRadiusBottomEnd="8dp">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etConfirmAccount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="numberPassword"
-                    android:maxLength="3"
-                    android:textColor="#111827"/>
+                    android:inputType="number"
+                    android:maxLength="18"
+                    android:textColor="@color/text_main"/>
             </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- IFSC Code -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilIFSC"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="IFSC Code"
+                android:textColorHint="#6B7280"
+                app:boxStrokeColor="@color/text_main"
+                app:boxBackgroundColor="@color/input_box_bg"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp"
+                app:helperText="e.g. SBIN0001234"
+                app:helperTextTextColor="#6B7280">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etIFSC"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapCharacters"
+                    android:maxLength="11"
+                    android:textColor="@color/text_main"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Account Type Row -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="6dp"
+                android:text="Account Type"
+                android:textColor="#6B7280"
+                android:textSize="13sp"/>
+
+            <RadioGroup
+                android:id="@+id/rgAccountType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:checkedButton="@+id/rbSavings">
+
+                <RadioButton
+                    android:id="@+id/rbSavings"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Savings"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp"
+                    android:buttonTint="#3B82F6"/>
+
+                <RadioButton
+                    android:id="@+id/rbCurrent"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Current"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp"
+                    android:buttonTint="#3B82F6"/>
+
+                <RadioButton
+                    android:id="@+id/rbNRE"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="NRE/NRO"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp"
+                    android:buttonTint="#3B82F6"/>
+            </RadioGroup>
+
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/containerCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="12dp"
+            android:visibility="gone">
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Card Number"
+                android:textColorHint="#6B7280"
+                app:boxStrokeColor="@color/text_main"
+                app:boxBackgroundColor="@color/input_box_bg"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etCardPayment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:maxLength="19"
+                    android:textColor="@color/text_main"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:hint="MM/YY"
+                    android:textColorHint="#6B7280"
+                    app:boxStrokeColor="@color/text_main"
+                    app:boxBackgroundColor="@color/input_box_bg"
+                    app:boxCornerRadiusTopStart="8dp"
+                    app:boxCornerRadiusTopEnd="8dp"
+                    app:boxCornerRadiusBottomStart="8dp"
+                    app:boxCornerRadiusBottomEnd="8dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etExpiry"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:maxLength="5"
+                        android:textColor="@color/text_main"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="CVV"
+                    android:textColorHint="#6B7280"
+                    app:boxStrokeColor="@color/text_main"
+                    app:boxBackgroundColor="@color/input_box_bg"
+                    app:boxCornerRadiusTopStart="8dp"
+                    app:boxCornerRadiusTopEnd="8dp"
+                    app:boxCornerRadiusBottomStart="8dp"
+                    app:boxCornerRadiusBottomEnd="8dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberPassword"
+                        android:maxLength="3"
+                        android:textColor="@color/text_main"/>
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnConfirmPayment"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"
+            android:text="Pay Securely"
+            android:textColor="@color/text_main"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="12dp"
+            app:backgroundTint="#3B82F6"/>
+
     </LinearLayout>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnConfirmPayment"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="16dp"
-        android:text="Pay Securely"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:cornerRadius="12dp"
-        app:backgroundTint="#3B82F6"/>
-
-</LinearLayout>
+</androidx.core.widget.NestedScrollView>
