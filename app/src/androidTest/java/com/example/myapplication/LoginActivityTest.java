@@ -4,7 +4,7 @@ import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.example.myapplication.activity.LoginActivity;
-import com.google.firebase.auth.FirebaseAuth;
+//import com.google.firebase.auth.FirebaseAuth;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +22,7 @@ public class LoginActivityTest {
     @Before
     public void signOut() {
         // Always start logged out so LoginActivity doesn't skip to MainActivity
-        FirebaseAuth.getInstance().signOut();
+        //FirebaseAuth.getInstance().signOut();
     }
 
     // --- UI Visibility Tests ---
