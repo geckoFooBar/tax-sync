@@ -33,22 +33,15 @@ import java.util.Locale;
 
 public class DashboardFragment extends Fragment {
 
-    // UI Elements
     private EditText editIncome;
     private TextView tvIncomeAmount, tvTaxPayableAmount, tvTaxPaidAmount, tvSavingsAmount, tvTaxInsight;
-
     private TextView tvCapGainsAmount, tvCryptoTaxAmount, tvPropertyTaxAmount, tvCessAmount;
     private PieChart taxChart;
-
     private double userCapGainsProfit = 0;
     private double userCryptoProfit = 0;
     private double userPropertyTax = 0;
-
-    // SharedPreferences name
     private static final String PREF_NAME = "TaxAppPrefs";
 
-    //SharedPreferences prefs = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-    // Helper Class for Tax Breakdown
     private static class TaxBreakdown {
         double baseIncomeTax, surcharge, capitalGainsTax, cryptoTax, propertyTax, professionalTax, cess, totalDeductions;
 
@@ -105,23 +98,18 @@ public class DashboardFragment extends Fragment {
 
         setupPieChart();
 
-        // 2. Load Saved Data from previous sessions/tabs
         loadSavedData();
 
-        // 3. Button Listeners
         btnAddAssets.setOnClickListener(v -> showAssetBottomSheet());
 
         btnClearData.setOnClickListener(v -> {
-            // Wipe variables
             userCapGainsProfit = 0;
             userCryptoProfit = 0;
             userPropertyTax = 0;
 
-            // Clear the main text box
             editIncome.setText("");
             editIncome.clearFocus();
 
-            // Wipe from phone storage too
             SharedPreferences prefs = requireActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
             prefs.edit().clear().apply();
         });
@@ -140,7 +128,6 @@ public class DashboardFragment extends Fragment {
         loadSavedData();
     }
 
-    // Loads the data the moment the fragment is created
     private void loadSavedData() {
         SharedPreferences prefs = requireActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
 
@@ -151,17 +138,15 @@ public class DashboardFragment extends Fragment {
         String savedIncome = prefs.getString("grossIncome", "");
         assert savedIncome != null;
         if (!savedIncome.isEmpty()) {
-            editIncome.setText(savedIncome); // This automatically triggers refreshDashboard()
+            editIncome.setText(savedIncome);
         }
         refreshDashboard();
     }
 
-    // Unified bulletproof method to recalculate AND auto-save everything
     private void refreshDashboard() {
         String incomeStr = editIncome.getText().toString();
         double grossIncome = 0;
 
-        // Safely try to read the number
         if (!incomeStr.trim().isEmpty()) {
             try {
                 grossIncome = Double.parseDouble(incomeStr);
@@ -170,7 +155,6 @@ public class DashboardFragment extends Fragment {
             }
         }
 
-        // AUTO-SAVE to phone storage instantly
         if (getActivity() != null) {
             SharedPreferences.Editor editor = requireActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE).edit();
             editor.putString("grossIncome", incomeStr);
@@ -180,7 +164,6 @@ public class DashboardFragment extends Fragment {
             editor.apply();
         }
 
-        // Calculate math
         TaxBreakdown breakdown = calculateComprehensiveTax(grossIncome);
 
         NumberFormat format = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
@@ -192,19 +175,16 @@ public class DashboardFragment extends Fragment {
         SharedPreferences prefs = requireActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         double totalCleared = prefs.getFloat("totalTaxesPaid", 0f);
 
-        // Safely update the Top 4 Cards
         if (tvIncomeAmount != null) tvIncomeAmount.setText(format.format(grossIncome));
         if (tvTaxPayableAmount != null) tvTaxPayableAmount.setText(format.format(totalLiability));
         if (tvTaxPaidAmount != null) tvTaxPaidAmount.setText(format.format(totalCleared));
         if (tvSavingsAmount != null) tvSavingsAmount.setText(format.format(takeHome));
 
-        // Safely update the Bottom 4 Details Cards
         if (tvCapGainsAmount != null) tvCapGainsAmount.setText(format.format(breakdown.capitalGainsTax));
         if (tvCryptoTaxAmount != null) tvCryptoTaxAmount.setText(format.format(breakdown.cryptoTax));
         if (tvPropertyTaxAmount != null) tvPropertyTaxAmount.setText(format.format(breakdown.propertyTax));
         if (tvCessAmount != null) tvCessAmount.setText(format.format(breakdown.cess + breakdown.professionalTax));
 
-        // Safely update Chart & Insights
         if (tvTaxInsight != null) updateInsight(grossIncome);
         if (taxChart != null) updateChartData(grossIncome, breakdown);
     }
@@ -229,7 +209,7 @@ public class DashboardFragment extends Fragment {
             userPropertyTax = parseInput(editProperty.getText().toString());
 
             dialog.dismiss();
-            refreshDashboard(); // This will recalculate AND auto-save to storage
+            refreshDashboard();
         });
 
         dialog.show();
@@ -249,7 +229,6 @@ public class DashboardFragment extends Fragment {
         catch (NumberFormatException e) { return 0; }
     }
 
-    // Helper method to calculate base tax (used for marginal relief checks)
     private double calculateBaseTaxOnly(double taxableIncome) {
         if (taxableIncome <= 400000) return 0;
         if (taxableIncome <= 800000) return (taxableIncome - 400000) * 0.05;
@@ -263,25 +242,20 @@ public class DashboardFragment extends Fragment {
     private TaxBreakdown calculateComprehensiveTax(double income) {
         TaxBreakdown tb = new TaxBreakdown();
 
-        // 1. Standard Deduction (₹75,000)
         tb.totalDeductions = Math.min(income, 75000);
         double taxableIncome = Math.max(0, income - tb.totalDeductions);
 
-        // 2. Base Income Tax (Strictly applying the FY 2026-27 New Regime Slabs)
         tb.baseIncomeTax = calculateBaseTaxOnly(taxableIncome);
 
-        // 3. Section 87A Rebate & Marginal Relief (Updated to ₹12L limit for FY 2026-27)
         if (taxableIncome <= 1200000) {
-            tb.baseIncomeTax = 0; // Full rebate up to ₹12L
+            tb.baseIncomeTax = 0;
         } else {
-            // Marginal Relief for incomes just above ₹12L
             double excessIncome = taxableIncome - 1200000;
             if (tb.baseIncomeTax > excessIncome) {
                 tb.baseIncomeTax = excessIncome;
             }
         }
 
-        // 4. Custom User Inputs (Special taxes are NOT covered by the Rebate/Relief)
         tb.capitalGainsTax = userCapGainsProfit * 0.125;
         tb.cryptoTax = userCryptoProfit * 0.30;
         tb.propertyTax = userPropertyTax;
@@ -290,8 +264,8 @@ public class DashboardFragment extends Fragment {
         double totalIncome = taxableIncome + userCapGainsProfit + userCryptoProfit;
 
         if (totalIncome > 5000000) {
-            double surchargeRate = 0;
-            double threshold = 0;
+            double surchargeRate;
+            double threshold;
 
             if (totalIncome > 20000000) {
                 surchargeRate = 0.25;
@@ -307,7 +281,6 @@ public class DashboardFragment extends Fragment {
             double calculatedSurcharge = tb.baseIncomeTax * surchargeRate;
             double totalTaxWithSurcharge = tb.baseIncomeTax + calculatedSurcharge;
 
-            // Calculate fair maximum tax to prevent the surcharge "cliff" penalty
             double taxAtThreshold = calculateBaseTaxOnly(threshold - 75000);
             double maxFairTax = taxAtThreshold + (totalIncome - threshold);
 
@@ -320,10 +293,8 @@ public class DashboardFragment extends Fragment {
             tb.surcharge = 0;
         }
 
-        // 6. Professional Tax Disabled
         tb.professionalTax = 0;
 
-        // 7. Health & Education Cess (4%)
         tb.cess = (tb.baseIncomeTax + tb.surcharge + tb.capitalGainsTax + tb.cryptoTax) * 0.04;
 
         return tb;
@@ -334,7 +305,7 @@ public class DashboardFragment extends Fragment {
         boolean isDarkMode = modePrefs.getBoolean("isDarkMode", false);
 
         String color = !isDarkMode ? "#111827" : "#E8EAF0";
-        String legendColor= !isDarkMode ? "#111827" : "#E8EAF0";;
+        String legendColor= !isDarkMode ? "#111827" : "#E8EAF0";
 
         taxChart.setUsePercentValues(false);
         taxChart.getDescription().setEnabled(false);
@@ -415,6 +386,16 @@ public class DashboardFragment extends Fragment {
             }
         }
 
+        // Read dark mode preference so value labels and lines are always visible
+        SharedPreferences modePrefs = requireActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        boolean isDarkMode = modePrefs.getBoolean("isDarkMode", false);
+        int valueTextColor = isDarkMode
+                ? Color.parseColor("#F0F2F8")   // bright white-blue for dark bg
+                : Color.parseColor("#111827");   // near-black for light bg
+        int valueLineColor = isDarkMode
+                ? Color.parseColor("#9CA6BA")    // muted blue-grey, visible on dark
+                : Color.parseColor("#6B7280");   // grey for light
+
         PieDataSet dataSet = new PieDataSet(entries, "");
         dataSet.setSliceSpace(3f);
         dataSet.setSelectionShift(8f);
@@ -424,11 +405,11 @@ public class DashboardFragment extends Fragment {
         dataSet.setValueLinePart1OffsetPercentage(80f);
         dataSet.setValueLinePart1Length(0.4f);
         dataSet.setValueLinePart2Length(0.2f);
-        dataSet.setValueLineColor(Color.parseColor("#9CA3AF"));
+        dataSet.setValueLineColor(valueLineColor);
 
         PieData data = new PieData(dataSet);
         data.setValueTextSize(12f);
-        data.setValueTextColor(Color.parseColor("#111827"));
+        data.setValueTextColor(valueTextColor);
         data.setValueFormatter(new PercentFormatter(taxChart));
 
         if (hasNoData || breakdown == null) {
