@@ -8,16 +8,24 @@ import android.util.Patterns;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myapplication.R;
+import com.example.myapplication.services.SupabaseAuthService;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.Objects;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class SignupActivity extends AppCompatActivity {
 
@@ -25,16 +33,14 @@ public class SignupActivity extends AppCompatActivity {
     private TextInputLayout nameLayout, emailLayout, passwordLayout, confirmPasswordLayout;
     private MaterialButton signupButton;
 
-    // Declare FirebaseAuth
-    private FirebaseAuth mAuth;
+    private SupabaseAuthService authService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
-        // Initialize Firebase Auth
-        mAuth = FirebaseAuth.getInstance();
+        authService = new SupabaseAuthService();
 
         // Bind UI Elements
         nameEditText = findViewById(R.id.nameEditText);
@@ -52,9 +58,7 @@ public class SignupActivity extends AppCompatActivity {
 
         signupButton.setOnClickListener(v -> registerUser());
 
-        loginText.setOnClickListener(v -> {
-            finish();
-        });
+        loginText.setOnClickListener(v -> finish());
     }
 
     @SuppressLint("SetTextI18n")
@@ -81,43 +85,66 @@ public class SignupActivity extends AppCompatActivity {
         signupButton.setEnabled(false);
         signupButton.setText("Creating Account...");
 
-        // Create user in Firebase
-        // Create user in Firebase
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        // Success! Get the newly created user
-                        FirebaseUser user = mAuth.getCurrentUser();
+        // Create user in Supabase
+        authService.signUp(email, password, name, new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                // Must return to main thread to update UI
+                runOnUiThread(() -> {
+                    signupButton.setEnabled(true);
+                    signupButton.setText("Create Account");
+                    Toast.makeText(SignupActivity.this, "Network Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+            }
 
-                        if (user != null) {
-                            // NEW: Attach the Full Name to the official Firebase Cloud Profile!
-                            com.google.firebase.auth.UserProfileChangeRequest profileUpdates =
-                                    new com.google.firebase.auth.UserProfileChangeRequest.Builder()
-                                            .setDisplayName(name)
-                                            .build();
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                final String responseData = response.body().string();
 
-                            user.updateProfile(profileUpdates);
+                runOnUiThread(() -> {
+                    if (response.isSuccessful()) {
+                        try {
+                            // Extract Supabase Session Tokens
+                            JSONObject json = new JSONObject(responseData);
+                            String accessToken = json.optString("access_token", "");
+                            String refreshToken = json.optString("refresh_token", "");
+
+                            // Save local data, including our new JWTs!
+                            SharedPreferences prefs = getSharedPreferences("auth", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putBoolean("isLoggedIn", true);
+                            editor.putString("userName", name);
+                            editor.putString("userEmail", email);
+                            editor.putString("accessToken", accessToken);
+                            editor.putString("refreshToken", refreshToken);
+                            editor.apply();
+
+                            Toast.makeText(SignupActivity.this, "Account Created Successfully!", Toast.LENGTH_SHORT).show();
+
+                            Intent intent = new Intent(SignupActivity.this, MainActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                            finish();
+
+                        } catch (JSONException e) {
+                            signupButton.setEnabled(true);
+                            signupButton.setText("Create Account");
+                            Toast.makeText(SignupActivity.this, "Data parsing error.", Toast.LENGTH_SHORT).show();
                         }
-
-                        // Save local data for immediate use
-                        SharedPreferences prefs = getSharedPreferences("auth", MODE_PRIVATE);
-                        SharedPreferences.Editor editor = prefs.edit();
-                        editor.putBoolean("isLoggedIn", true);
-                        editor.putString("userName", name);
-                        editor.putString("userEmail", email);
-                        editor.apply();
-
-                        Toast.makeText(SignupActivity.this, "Account Created Successfully!", Toast.LENGTH_SHORT).show();
-
-                        Intent intent = new Intent(SignupActivity.this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        finish();
                     } else {
                         signupButton.setEnabled(true);
                         signupButton.setText("Create Account");
-                        Toast.makeText(SignupActivity.this, "Error: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_LONG).show();
+                        try {
+                            // Supabase usually sends a nice JSON error message
+                            JSONObject errorJson = new JSONObject(responseData);
+                            String errorMsg = errorJson.optString("msg", "Registration Failed");
+                            Toast.makeText(SignupActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                        } catch (JSONException e) {
+                            Toast.makeText(SignupActivity.this, "Registration Failed: " + response.code(), Toast.LENGTH_LONG).show();
+                        }
                     }
                 });
+            }
+        });
     }
 }
